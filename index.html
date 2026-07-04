@@ -4,23 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard SE2026 - BPS</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <link href="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.3/dist/style.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.3" type="text/javascript"></script>
 
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        background: '#ffffff',
-                        foreground: '#09090b',
-                        muted: '#f4f4f5',
-                        'muted-foreground': '#71717a',
-                        border: '#e4e4e7',
-                        input: '#e4e4e7',
-                        primary: '#18181b',
-                        'primary-foreground': '#fafafa',
+                        background: '#ffffff', foreground: '#09090b',
+                        muted: '#f4f4f5', 'muted-foreground': '#71717a',
+                        border: '#e4e4e7', input: '#e4e4e7',
+                        primary: '#18181b', 'primary-foreground': '#fafafa',
                     },
                     fontFamily: { sans: ['Inter', 'sans-serif'] }
                 }
@@ -30,147 +29,163 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body { background-color: theme('colors.background'); color: theme('colors.foreground'); }
-        /* Scrollbar ala Shadcn */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #a1a1aa; }
-        .shadcn-card { background: white; border: 1px solid #e4e4e7; border-radius: 0.75rem; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); }
-        .shadcn-input { display: flex; height: 2.25rem; width: 100%; border-radius: 0.375rem; border: 1px solid #e4e4e7; background: transparent; padding: 0.5rem 0.75rem; font-size: 0.875rem; transition: colors; }
-        .shadcn-input:focus { outline: none; border-color: #18181b; ring: 1px solid #18181b; }
-        .shadcn-btn { display: inline-flex; align-items: center; justify-content: center; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 500; height: 2.25rem; padding: 0 1rem; transition: colors; cursor: pointer; }
+        .shadcn-card { background: white; border: 1px solid #e4e4e7; border-radius: 0.5rem; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); }
+        .shadcn-input { display: flex; height: 2.25rem; width: 100%; border-radius: 0.375rem; border: 1px solid #e4e4e7; background: transparent; padding: 0.5rem 0.75rem; font-size: 0.875rem; }
+        .shadcn-input:focus { outline: none; border-color: #18181b; }
+        .shadcn-btn { display: inline-flex; align-items: center; justify-content: center; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 500; height: 2.25rem; padding: 0 1rem; cursor: pointer; }
         .shadcn-btn-primary { background-color: #18181b; color: #fafafa; }
-        .shadcn-btn-primary:hover { background-color: #27272a; }
-        .shadcn-btn-ghost { background-color: transparent; color: #09090b; }
-        .shadcn-btn-ghost:hover { background-color: #f4f4f5; }
         .tab-active { border-bottom: 2px solid #18181b; color: #18181b; font-weight: 600; }
         .tab-inactive { color: #71717a; }
+        
+        /* DataTable Overrides for Clean Look */
+        .datatable-wrapper { font-size: 0.875rem; color: #09090b; }
+        .datatable-top, .datatable-bottom { padding: 1rem; }
+        .datatable-selector, .datatable-input { border: 1px solid #e4e4e7; border-radius: 0.375rem; padding: 0.25rem 0.5rem; }
+        .datatable-table > thead > tr > th { border-bottom: 2px solid #e4e4e7; padding: 0.75rem 1rem; color: #71717a; font-weight: 600; text-align: left; }
+        .datatable-table > tbody > tr > td { border-bottom: 1px solid #f4f4f5; padding: 0.75rem 1rem; }
+        .datatable-table > tbody > tr:hover { background-color: #f4f4f5; }
+        .badge { padding: 0.125rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+        .badge-success { background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .badge-danger { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
     </style>
 </head>
 <body class="min-h-screen antialiased flex flex-col">
 
-    <header class="border-b border-border sticky top-0 bg-background/95 backdrop-blur z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+    <header class="border-b border-border sticky top-0 bg-white/95 backdrop-blur z-50">
+        <div class="max-w-[1400px] mx-auto px-4 sm:px-6 py-4">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 class="text-xl font-bold tracking-tight">Monitoring SE2026</h1>
-                    <p class="text-sm text-muted-foreground">Evaluasi Progress & Kualitas Data</p>
+                    <h1 class="text-xl font-bold tracking-tight">SE2026 Analytics</h1>
+                    <p class="text-sm text-muted-foreground">Dashboard Progress & Kualitas Pendataan</p>
                 </div>
                 
                 <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
-                    <select id="filter-kecamatan" onchange="applyFilter()" class="shadcn-input w-full sm:w-48 bg-white cursor-pointer disabled:opacity-50" disabled>
-                        <option value="ALL">Semua Kecamatan</option>
+                    <select id="filter-wilayah" onchange="applyFilter()" class="shadcn-input w-full sm:w-56 bg-white cursor-pointer" disabled>
+                        <option value="ALL">Semua Kecamatan (Level Kec)</option>
                     </select>
 
                     <div class="relative">
                         <input type="file" id="excel-file" accept=".xlsx, .xls" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                         <button class="shadcn-btn shadcn-btn-primary w-full sm:w-auto flex gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
-                            Upload Data (Excel)
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+                            Upload Excel
                         </button>
                     </div>
                 </div>
             </div>
 
-            <div class="flex gap-6 mt-6 border-b border-border overflow-x-auto no-scrollbar" id="tabs-container" style="display: none;">
+            <div class="flex gap-6 mt-6 border-b border-border overflow-x-auto" id="tabs-container" style="display: none;">
                 <button onclick="switchTab('progress')" id="tab-btn-progress" class="pb-3 text-sm tab-active whitespace-nowrap">Progress Pendataan</button>
-                <button onclick="switchTab('kualitas')" id="tab-btn-kualitas" class="pb-3 text-sm tab-inactive whitespace-nowrap">Kualitas Data</button>
+                <button onclick="switchTab('kualitas')" id="tab-btn-kualitas" class="pb-3 text-sm tab-inactive whitespace-nowrap">Pengecekan Kualitas</button>
             </div>
         </div>
     </header>
 
-    <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-8">
+    <main class="flex-1 w-full max-w-[1400px] mx-auto px-4 sm:px-6 py-6 space-y-8">
         
-        <div id="welcome-state" class="shadcn-card p-8 sm:p-12 text-center max-w-2xl mx-auto mt-10">
-            <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
-            </div>
-            <h2 class="text-lg font-semibold mb-2">Belum Ada Data Terbaca</h2>
-            <p class="text-sm text-muted-foreground mb-6">Silakan upload file Excel hasil export monitoring Fasih SE2026. Data akan diproses secara lokal di browser Anda.</p>
+        <div id="welcome-state" class="shadcn-card p-12 text-center max-w-2xl mx-auto mt-10">
+            <h2 class="text-lg font-semibold mb-2">Menunggu Data</h2>
+            <p class="text-sm text-muted-foreground">Upload file excel monitoring dengan sheet 'seluruh sls' untuk memuat dashboard.</p>
         </div>
 
-        <div id="view-progress" class="hidden space-y-6 animate-in fade-in duration-500">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="shadcn-card p-5">
-                    <p class="text-sm font-medium text-muted-foreground">Total Prelist Fasih (Target)</p>
-                    <h3 id="prog-target" class="text-2xl font-bold mt-1">0</h3>
+        <div id="view-progress" class="hidden space-y-6">
+            
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="shadcn-card p-4">
+                    <p class="text-xs text-muted-foreground font-medium uppercase">Target Prelist Fasih</p>
+                    <h3 id="p-sum-target" class="text-2xl font-bold mt-1">0</h3>
                 </div>
-                <div class="shadcn-card p-5">
-                    <p class="text-sm font-medium text-muted-foreground">Total Pengerjaan Fasih (Selesai)</p>
-                    <h3 id="prog-selesai" class="text-2xl font-bold mt-1">0</h3>
+                <div class="shadcn-card p-4">
+                    <p class="text-xs text-muted-foreground font-medium uppercase">Total Dikerjakan</p>
+                    <h3 id="p-sum-realisasi" class="text-2xl font-bold mt-1">0</h3>
                 </div>
-                <div class="shadcn-card p-5 sm:col-span-2 flex flex-col justify-center">
+                <div class="shadcn-card p-4 col-span-2 flex flex-col justify-center">
                     <div class="flex justify-between mb-2">
-                        <span class="text-sm font-medium">Persentase Pengerjaan Keseluruhan</span>
-                        <span id="prog-persen-text" class="text-sm font-bold">0%</span>
+                        <span class="text-xs font-medium uppercase text-muted-foreground">Persentase Progress</span>
+                        <span id="p-sum-persen" class="text-sm font-bold">0%</span>
                     </div>
-                    <div class="w-full bg-muted rounded-full h-3">
-                        <div id="prog-bar" class="bg-primary h-3 rounded-full transition-all duration-1000" style="width: 0%"></div>
-                    </div>
+                    <div class="w-full bg-muted rounded-full h-2"><div id="p-sum-bar" class="bg-primary h-2 rounded-full" style="width: 0%"></div></div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="shadcn-card p-5 lg:col-span-2">
-                    <h3 class="text-sm font-semibold mb-4">Perbandingan Target vs Pengerjaan (Per Kecamatan)</h3>
-                    <div id="chart-progress" class="w-full min-h-[300px]"></div>
+            <div class="shadcn-card p-5">
+                <h3 class="text-sm font-semibold mb-1">Progress per Wilayah (Diurutkan dari Tertinggi)</h3>
+                <p id="p-wil-subtitle" class="text-xs text-muted-foreground mb-4">Menampilkan level Kecamatan</p>
+                <div id="chart-prog-wil" class="w-full h-[300px]"></div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="shadcn-card p-5"><h3 class="text-sm font-semibold mb-4">Top 10 PPL Progress Tertinggi</h3><div id="chart-prog-ppl-top" class="h-[280px]"></div></div>
+                <div class="shadcn-card p-5"><h3 class="text-sm font-semibold mb-4">Top 10 PPL Progress Terendah</h3><div id="chart-prog-ppl-bot" class="h-[280px]"></div></div>
+                <div class="shadcn-card p-5"><h3 class="text-sm font-semibold mb-4">Top 10 PML Progress Tertinggi</h3><div id="chart-prog-pml-top" class="h-[280px]"></div></div>
+                <div class="shadcn-card p-5"><h3 class="text-sm font-semibold mb-4">Top 10 PML Progress Terendah</h3><div id="chart-prog-pml-bot" class="h-[280px]"></div></div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="shadcn-card overflow-hidden">
+                    <div class="p-4 border-b border-border bg-muted/30"><h3 class="text-sm font-semibold">Tabel Rincian Progress Wilayah</h3></div>
+                    <table id="dt-prog-wil"></table>
                 </div>
-                
-                <div class="shadcn-card p-5 bg-muted/30">
-                    <h3 class="text-sm font-semibold mb-3 flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-                        Ringkasan Pengerjaan
-                    </h3>
-                    <div id="insight-progress" class="text-sm text-muted-foreground space-y-3">
-                        </div>
+                <div class="shadcn-card overflow-hidden">
+                    <div class="p-4 border-b border-border bg-muted/30"><h3 class="text-sm font-semibold">Tabel Rincian Progress PPL</h3></div>
+                    <table id="dt-prog-ppl"></table>
+                </div>
+                <div class="shadcn-card overflow-hidden">
+                    <div class="p-4 border-b border-border bg-muted/30"><h3 class="text-sm font-semibold">Tabel Rincian Progress PML</h3></div>
+                    <table id="dt-prog-pml"></table>
                 </div>
             </div>
         </div>
 
-        <div id="view-kualitas" class="hidden space-y-6 animate-in fade-in duration-500">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="shadcn-card p-5">
-                    <p class="text-xs font-medium text-muted-foreground">1. Ditemukan</p>
-                    <h3 id="qual-1" class="text-xl sm:text-2xl font-bold mt-1">0</h3>
+        <div id="view-kualitas" class="hidden space-y-6">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="shadcn-card p-4">
+                    <p class="text-xs text-muted-foreground font-medium uppercase">1. Ditemukan</p>
+                    <h3 id="k-sum-1" class="text-2xl font-bold mt-1">0</h3>
                 </div>
-                <div class="shadcn-card p-5 border-l-4 border-l-zinc-800">
-                    <p class="text-xs font-medium text-muted-foreground">2. Baru</p>
-                    <h3 id="qual-2" class="text-xl sm:text-2xl font-bold mt-1">0</h3>
+                <div class="shadcn-card p-4 border-l-4 border-l-zinc-800">
+                    <p class="text-xs text-muted-foreground font-medium uppercase">2. Baru</p>
+                    <h3 id="k-sum-2" class="text-2xl font-bold mt-1">0</h3>
                 </div>
-                <div class="shadcn-card p-5">
-                    <p class="text-xs font-medium text-muted-foreground">0. Tidak Ditemukan</p>
-                    <h3 id="qual-0" class="text-xl sm:text-2xl font-bold mt-1">0</h3>
+                <div class="shadcn-card p-4">
+                    <p class="text-xs text-muted-foreground font-medium uppercase">0. Tidak Ditemukan</p>
+                    <h3 id="k-sum-0" class="text-2xl font-bold mt-1">0</h3>
                 </div>
-                <div class="shadcn-card p-5 bg-muted/30">
-                    <p class="text-xs font-medium text-muted-foreground">Status Lainnya (3,4,5,6)</p>
-                    <h3 id="qual-other" class="text-xl sm:text-2xl font-bold mt-1">0</h3>
+                <div class="shadcn-card p-4 bg-muted/30">
+                    <p class="text-xs text-muted-foreground font-medium uppercase">Status Lainnya</p>
+                    <h3 id="k-sum-other" class="text-2xl font-bold mt-1">0</h3>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="shadcn-card p-5 lg:col-span-1 flex flex-col justify-center items-center">
-                    <h3 class="text-sm font-semibold mb-4 w-full text-left">Komposisi Status Ditemukan</h3>
-                    <div id="chart-kualitas" class="w-full flex justify-center"></div>
-                </div>
+            <div class="shadcn-card p-5">
+                <h3 class="text-sm font-semibold mb-1">Kualitas Data per Wilayah (Rasio Ditemukan+Baru)</h3>
+                <p id="k-wil-subtitle" class="text-xs text-muted-foreground mb-4">Menampilkan level Kecamatan</p>
+                <div id="chart-qual-wil" class="w-full h-[300px]"></div>
+            </div>
 
-                <div class="shadcn-card p-5 lg:col-span-2 overflow-hidden flex flex-col">
-                    <h3 class="text-sm font-semibold mb-4">Rincian Kualitas Data per Petugas (Top 50)</h3>
-                    <div class="overflow-x-auto flex-1 custom-scrollbar">
-                        <table class="w-full text-sm text-left">
-                            <thead class="text-xs text-muted-foreground bg-muted/50 uppercase border-b border-border">
-                                <tr>
-                                    <th class="px-4 py-3 font-medium whitespace-nowrap">Nama PPL</th>
-                                    <th class="px-4 py-3 font-medium whitespace-nowrap text-right">Prelist</th>
-                                    <th class="px-4 py-3 font-medium whitespace-nowrap text-right border-l border-border">0. Tidak Ditemukan</th>
-                                    <th class="px-4 py-3 font-medium whitespace-nowrap text-right">1. Ditemukan</th>
-                                    <th class="px-4 py-3 font-medium whitespace-nowrap text-right">2. Baru</th>
-                                    <th class="px-4 py-3 font-medium whitespace-nowrap text-right">Lainnya</th>
-                                </tr>
-                            </thead>
-                            <tbody id="table-kualitas-body" class="divide-y divide-border">
-                                </tbody>
-                        </table>
-                    </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="shadcn-card p-5"><h3 class="text-sm font-semibold mb-4">Top 10 PPL Rasio Ditemukan Tertinggi</h3><div id="chart-qual-ppl-top" class="h-[280px]"></div></div>
+                <div class="shadcn-card p-5"><h3 class="text-sm font-semibold mb-4">Top 10 PPL Rasio Ditemukan Terendah</h3><div id="chart-qual-ppl-bot" class="h-[280px]"></div></div>
+                <div class="shadcn-card p-5"><h3 class="text-sm font-semibold mb-4">Top 10 PML Rasio Ditemukan Tertinggi</h3><div id="chart-qual-pml-top" class="h-[280px]"></div></div>
+                <div class="shadcn-card p-5"><h3 class="text-sm font-semibold mb-4">Top 10 PML Rasio Ditemukan Terendah</h3><div id="chart-qual-pml-bot" class="h-[280px]"></div></div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="shadcn-card overflow-hidden">
+                    <div class="p-4 border-b border-border bg-muted/30"><h3 class="text-sm font-semibold">Tabel Kualitas Data Wilayah</h3></div>
+                    <table id="dt-qual-wil"></table>
+                </div>
+                <div class="shadcn-card overflow-hidden">
+                    <div class="p-4 border-b border-border bg-muted/30"><h3 class="text-sm font-semibold">Tabel Kualitas Data PPL</h3></div>
+                    <table id="dt-qual-ppl"></table>
+                </div>
+                <div class="shadcn-card overflow-hidden">
+                    <div class="p-4 border-b border-border bg-muted/30"><h3 class="text-sm font-semibold">Tabel Kualitas Data PML</h3></div>
+                    <table id="dt-qual-pml"></table>
                 </div>
             </div>
         </div>
@@ -178,228 +193,248 @@
     </main>
 
     <script>
-        // Global variables
-        let rawData = [];
-        let filteredData = [];
-        let chartProgInstance = null;
-        let chartQualInstance = null;
+        let rawData = [], filteredData = [];
+        let activeTab = 'progress';
+        let charts = {};
+        let tables = {};
 
-        // Event Listeners
+        // Helper calculation
+        const startDate = new Date('2026-06-15');
+        const today = new Date(); 
+        let elapsedDays = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
+        if (elapsedDays < 1) elapsedDays = 1;
+        const TARGET_DAILY = 10;
+
         document.getElementById('excel-file').addEventListener('change', handleFile, false);
 
-        // UI Tabs Logic
         function switchTab(tab) {
+            activeTab = tab;
             document.getElementById('view-progress').classList.add('hidden');
             document.getElementById('view-kualitas').classList.add('hidden');
-            
             document.getElementById('tab-btn-progress').className = 'pb-3 text-sm tab-inactive whitespace-nowrap';
             document.getElementById('tab-btn-kualitas').className = 'pb-3 text-sm tab-inactive whitespace-nowrap';
-
+            
             document.getElementById('view-' + tab).classList.remove('hidden');
             document.getElementById('tab-btn-' + tab).className = 'pb-3 text-sm tab-active whitespace-nowrap';
             
-            // Rerender charts to fix width bug when hidden
-            if(tab === 'progress' && chartProgInstance) chartProgInstance.render();
-            if(tab === 'kualitas' && chartQualInstance) chartQualInstance.render();
+            // Re-render charts logic is handled inside render function
+            if(rawData.length > 0) applyFilter();
         }
 
         function handleFile(e) {
-            const files = e.target.files;
-            if (!files.length) return;
-            const file = files[0];
+            const file = e.target.files[0];
+            if (!file) return;
             const reader = new FileReader();
-
             reader.onload = function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, {type: 'array'});
-                    const sheetName = workbook.SheetNames.find(name => name.toLowerCase().includes('sls')) || workbook.SheetNames[0];
-                    rawData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
-
-                    if(rawData && rawData.length > 0) {
-                        populateFilter();
-                        applyFilter(); // Trigger render
-                        document.getElementById('welcome-state').classList.add('hidden');
-                        document.getElementById('tabs-container').style.display = 'flex';
-                        switchTab('progress');
-                    }
-                } catch (err) {
-                    alert("Gagal membaca file Excel. Pastikan format benar.");
+                const data = new Uint8Array(e.target.result);
+                const wb = XLSX.read(data, {type: 'array'});
+                const sheet = wb.Sheets[wb.SheetNames.find(n => n.toLowerCase().includes('sls')) || wb.SheetNames[0]];
+                rawData = XLSX.utils.sheet_to_json(sheet);
+                
+                if(rawData.length > 0) {
+                    populateFilter();
+                    document.getElementById('welcome-state').classList.add('hidden');
+                    document.getElementById('tabs-container').style.display = 'flex';
+                    applyFilter();
                 }
             };
             reader.readAsArrayBuffer(file);
         }
 
         function populateFilter() {
-            let select = document.getElementById('filter-kecamatan');
-            select.innerHTML = '<option value="ALL">Semua Kecamatan</option>';
+            let select = document.getElementById('filter-wilayah');
+            select.innerHTML = '<option value="ALL">Semua Kecamatan (Tampilkan Level Kec)</option>';
             let kecs = new Set();
-            rawData.forEach(row => {
-                let k = row['Nama Kec'];
-                if(k) kecs.add(k);
-            });
-            Array.from(kecs).sort().forEach(k => {
-                select.innerHTML += `<option value="${k}">${k}</option>`;
-            });
+            rawData.forEach(r => { if(r['Nama Kec']) kecs.add(r['Nama Kec']) });
+            Array.from(kecs).sort().forEach(k => select.innerHTML += `<option value="${k}">${k} (Tampilkan Level Desa)</option>`);
             select.disabled = false;
         }
 
         function applyFilter() {
-            let filterVal = document.getElementById('filter-kecamatan').value;
-            if (filterVal === 'ALL') {
-                filteredData = rawData;
-            } else {
-                filteredData = rawData.filter(row => row['Nama Kec'] === filterVal);
-            }
-            renderDashboardProgress();
-            renderDashboardKualitas();
+            let filter = document.getElementById('filter-wilayah').value;
+            filteredData = (filter === 'ALL') ? rawData : rawData.filter(r => r['Nama Kec'] === filter);
+            let wilayahKey = (filter === 'ALL') ? 'Nama Kec' : 'Nama Desa';
+            let subtitle = (filter === 'ALL') ? 'Menampilkan data level Kecamatan' : `Menampilkan data level Desa di Kecamatan ${filter}`;
+            
+            document.getElementById('p-wil-subtitle').innerText = subtitle;
+            document.getElementById('k-wil-subtitle').innerText = subtitle;
+
+            if (activeTab === 'progress') buildProgress(wilayahKey);
+            else buildKualitas(wilayahKey);
         }
 
-        // ================= DASHBOARD 1: PROGRESS =================
-        function renderDashboardProgress() {
-            let targetTotal = 0;
-            let selesaiTotal = 0;
-            let kecGroup = {};
+        function destroyChart(id) { if(charts[id]) charts[id].destroy(); }
+        function destroyTable(id) { if(tables[id]) tables[id].destroy(); }
 
-            filteredData.forEach(row => {
-                let target = parseInt(row['Total Muatan FASIH']) || 0;
-                let pengerjaan = parseInt(row['Total Pengerjaan Fasih']) || 0;
-                let kec = row['Nama Kec'] || 'Unknown';
+        function renderChart(id, options) {
+            destroyChart(id);
+            charts[id] = new ApexCharts(document.querySelector("#" + id), options);
+            charts[id].render();
+        }
 
-                targetTotal += target;
-                selesaiTotal += pengerjaan;
-
-                if(!kecGroup[kec]) kecGroup[kec] = { target: 0, selesai: 0 };
-                kecGroup[kec].target += target;
-                kecGroup[kec].selesai += pengerjaan;
+        function renderTable(id, headings, data) {
+            destroyTable(id);
+            tables[id] = new simpleDatatables.DataTable("#" + id, {
+                data: { headings: headings, data: data },
+                searchable: true, sortable: true, perPage: 10
             });
+        }
 
-            // Update UI
-            document.getElementById('prog-target').innerText = targetTotal.toLocaleString('id-ID');
-            document.getElementById('prog-selesai').innerText = selesaiTotal.toLocaleString('id-ID');
-            
-            let persen = targetTotal > 0 ? ((selesaiTotal / targetTotal) * 100).toFixed(1) : 0;
-            document.getElementById('prog-persen-text').innerText = persen + "%";
-            document.getElementById('prog-bar').style.width = Math.min(persen, 100) + "%";
-
-            // Chart Progress
-            let categories = Object.keys(kecGroup);
-            let dataTarget = categories.map(k => kecGroup[k].target);
-            let dataSelesai = categories.map(k => kecGroup[k].selesai);
-
-            let optProg = {
-                series: [{ name: 'Prelist Fasih (Target)', data: dataTarget }, { name: 'Pengerjaan Fasih (Selesai)', data: dataSelesai }],
-                chart: { type: 'bar', height: 350, toolbar: { show: false }, fontFamily: 'Inter, sans-serif' },
-                plotOptions: { bar: { horizontal: false, columnWidth: '60%', borderRadius: 3 } },
-                dataLabels: { enabled: false },
-                stroke: { show: true, width: 2, colors: ['transparent'] },
-                xaxis: { categories: categories, labels: { style: { colors: '#71717a' } } },
-                yaxis: { labels: { style: { colors: '#71717a' } } },
-                colors: ['#d4d4d8', '#18181b'], // Abu-abu dan Hitam Shadcn
-                fill: { opacity: 1 },
-                legend: { position: 'top', horizontalAlign: 'left', labels: { colors: '#09090b' } },
-                grid: { borderColor: '#e4e4e7', strokeDashArray: 4 }
-            };
-
-            if(chartProgInstance) chartProgInstance.destroy();
-            chartProgInstance = new ApexCharts(document.querySelector("#chart-progress"), optProg);
-            chartProgInstance.render();
-
-            // Insight Logic
-            let deficit = targetTotal - selesaiTotal;
-            let divInsight = document.getElementById('insight-progress');
-            divInsight.innerHTML = '';
-            
-            if (deficit <= 0 && targetTotal > 0) {
-                divInsight.innerHTML = `<p><b>Pengerjaan Tuntas!</b> Seluruh target Prelist Fasih telah dikerjakan atau bahkan melebihi target.</p>`;
-            } else {
-                divInsight.innerHTML = `<p>Sisa dokumen pengerjaan fasih yang masih perlu diselesaikan adalah <b>${deficit.toLocaleString('id-ID')} dokumen</b>.</p>`;
-            }
-            if (categories.length > 1) {
-                let lowestKec = categories.reduce((a, b) => (kecGroup[a].selesai/kecGroup[a].target) < (kecGroup[b].selesai/kecGroup[b].target) ? a : b);
-                divInsight.innerHTML += `<p class="mt-2 text-red-600">Perhatian: Kecamatan <b>${lowestKec}</b> memiliki rasio penyelesaian paling lambat dibandingkan wilayah lain yang ditampilkan.</p>`;
+        function getBaseChartOpt() {
+            return {
+                chart: { type: 'bar', toolbar: { show: false }, fontFamily: 'Inter, sans-serif' },
+                colors: ['#18181b', '#a1a1aa'],
+                plotOptions: { bar: { horizontal: true, borderRadius: 2, dataLabels: { position: 'top' } } },
+                dataLabels: { enabled: true, textAnchor: 'start', style: { colors: ['#09090b'] }, formatter: function(val, opt) { return val + "%" }, offsetX: 0 },
+                xaxis: { max: 100, labels: { formatter: val => val + "%" } },
+                grid: { borderColor: '#f4f4f5', strokeDashArray: 3 }
             }
         }
 
-        // ================= DASHBOARD 2: KUALITAS =================
-        function renderDashboardKualitas() {
-            let sum0 = 0, sum1 = 0, sum2 = 0, sumOther = 0;
-            let pplGroup = {};
+        function buildProgress(wilKey) {
+            let sumTarget = 0, sumReal = 0;
+            let mapWil = {}, mapPPL = {}, mapPML = {};
 
-            filteredData.forEach(row => {
-                let s0 = parseInt(row['0. Tidak Ditemukan']) || 0;
-                let s1 = parseInt(row['1. Ditemukan']) || 0;
-                let s2 = parseInt(row['2. Baru']) || 0;
-                let s3 = parseInt(row['3. Meninggal']) || 0;
-                let s4 = parseInt(row['4. Tidak Eligible']) || 0;
-                let s5 = parseInt(row['5. Tidak dapat ditemui sampai akhir pendataan']) || 0;
-                let s6 = parseInt(row['6. Keluarga Khusus']) || 0;
-                
-                let target = parseInt(row['Total Muatan FASIH']) || 0;
-                let other = s3 + s4 + s5 + s6;
+            filteredData.forEach(r => {
+                let target = parseInt(r['Total Muatan FASIH']) || 0;
+                let real = parseInt(r['Total Pengerjaan Fasih']) || 0;
+                let kec = r['Nama Kec'] || '-';
+                let wil = r[wilKey] || '-';
+                let ppl = r['Nama PPL'] || '-';
+                let pml = r['Nama PML'] || '-';
 
-                sum0 += s0; sum1 += s1; sum2 += s2; sumOther += other;
+                sumTarget += target; sumReal += real;
 
-                let ppl = row['Nama PPL'] || 'Tidak Diketahui';
-                if(!pplGroup[ppl]) pplGroup[ppl] = { prelist:0, s0:0, s1:0, s2:0, other:0 };
-                pplGroup[ppl].prelist += target;
-                pplGroup[ppl].s0 += s0;
-                pplGroup[ppl].s1 += s1;
-                pplGroup[ppl].s2 += s2;
-                pplGroup[ppl].other += other;
+                if(!mapWil[wil]) mapWil[wil] = { target:0, real:0 };
+                mapWil[wil].target += target; mapWil[wil].real += real;
+
+                if(!mapPPL[ppl]) mapPPL[ppl] = { name: ppl, kec: kec, target:0, real:0 };
+                mapPPL[ppl].target += target; mapPPL[ppl].real += real;
+
+                if(!mapPML[pml]) mapPML[pml] = { name: pml, kec: kec, target:0, real:0 };
+                mapPML[pml].target += target; mapPML[pml].real += real;
             });
 
-            // Update UI
-            document.getElementById('qual-0').innerText = sum0.toLocaleString('id-ID');
-            document.getElementById('qual-1').innerText = sum1.toLocaleString('id-ID');
-            document.getElementById('qual-2').innerText = sum2.toLocaleString('id-ID');
-            document.getElementById('qual-other').innerText = sumOther.toLocaleString('id-ID');
+            // Update Summary
+            document.getElementById('p-sum-target').innerText = sumTarget.toLocaleString('id-ID');
+            document.getElementById('p-sum-realisasi').innerText = sumReal.toLocaleString('id-ID');
+            let pctGlobal = sumTarget ? (sumReal/sumTarget*100).toFixed(1) : 0;
+            document.getElementById('p-sum-persen').innerText = pctGlobal + "%";
+            document.getElementById('p-sum-bar').style.width = Math.min(pctGlobal, 100) + "%";
 
-            // Donut Chart Kualitas
-            let optQual = {
-                series: [sum1, sum2, sum0, sumOther],
-                labels: ['1. Ditemukan', '2. Baru', '0. Tidak Ditemukan', 'Lainnya (3,4,5,6)'],
-                chart: { type: 'donut', height: 320, fontFamily: 'Inter, sans-serif' },
-                colors: ['#18181b', '#52525b', '#a1a1aa', '#e4e4e7'], // Skema monokrom / grayscale
-                plotOptions: { pie: { donut: { size: '60%' } } },
-                dataLabels: { enabled: false },
-                legend: { position: 'bottom', labels: { colors: '#09090b' } },
-                stroke: { width: 1, colors: ['#ffffff'] }
+            // Process Arrays & Sort
+            let arrWil = Object.keys(mapWil).map(k => ({ name: k, ...mapWil[k], pct: mapWil[k].target ? (mapWil[k].real/mapWil[k].target*100) : 0 })).sort((a,b) => b.pct - a.pct);
+            let arrPPL = Object.values(mapPPL).map(p => ({ ...p, pct: p.target ? (p.real/p.target*100) : 0 })).sort((a,b) => b.pct - a.pct);
+            let arrPML = Object.values(mapPML).map(p => ({ ...p, pct: p.target ? (p.real/p.target*100) : 0 })).sort((a,b) => b.pct - a.pct);
+
+            // Chart 1: Wilayah
+            renderChart('chart-prog-wil', {
+                ...getBaseChartOpt(),
+                series: [{ name: 'Progress (%)', data: arrWil.map(w => w.pct.toFixed(1)) }],
+                xaxis: { categories: arrWil.map(w => w.name) }
+            });
+
+            // Helper for Person Charts
+            function createPersonChartOpts(arr, isTop) {
+                let slice = isTop ? arr.slice(0, 10) : [...arr].reverse().slice(0, 10);
+                return {
+                    ...getBaseChartOpt(),
+                    series: [{ name: 'Progress', data: slice.map(x => x.pct.toFixed(1)) }],
+                    xaxis: { categories: slice.map(x => x.name + ` (${x.kec})`) }
+                };
+            }
+
+            // Charts Top/Bottom PPL & PML
+            renderChart('chart-prog-ppl-top', createPersonChartOpts(arrPPL, true));
+            renderChart('chart-prog-ppl-bot', createPersonChartOpts(arrPPL, false));
+            renderChart('chart-prog-pml-top', createPersonChartOpts(arrPML, true));
+            renderChart('chart-prog-pml-bot', createPersonChartOpts(arrPML, false));
+
+            // Tables
+            let getOnTrack = (real) => {
+                let daily = real / elapsedDays;
+                return daily >= TARGET_DAILY ? `<span class="badge badge-success">On Track (${daily.toFixed(1)}/hr)</span>` : `<span class="badge badge-danger">Lambat (${daily.toFixed(1)}/hr)</span>`;
             };
 
-            if(chartQualInstance) chartQualInstance.destroy();
-            chartQualInstance = new ApexCharts(document.querySelector("#chart-kualitas"), optQual);
-            chartQualInstance.render();
+            renderTable('dt-prog-wil', ["Wilayah", "Target", "Realisasi", "Progress %"], arrWil.map(w => [w.name, w.target.toString(), w.real.toString(), w.pct.toFixed(2)+"%"]));
+            renderTable('dt-prog-ppl', ["Nama PPL", "Kecamatan", "Target", "Realisasi", "Progress %", "Status Kinerja"], arrPPL.map(p => [p.name, p.kec, p.target.toString(), p.real.toString(), p.pct.toFixed(2)+"%", getOnTrack(p.real)]));
+            renderTable('dt-prog-pml', ["Nama PML", "Kecamatan", "Target", "Realisasi", "Progress %", "Status Kinerja"], arrPML.map(p => [p.name, p.kec, p.target.toString(), p.real.toString(), p.pct.toFixed(2)+"%", getOnTrack(p.real)]));
+        }
 
-            // Table Petugas (Top 50 by volume input)
-            let sortedPpl = Object.keys(pplGroup)
-                                  .map(k => ({ name: k, ...pplGroup[k] }))
-                                  .sort((a, b) => (b.s0+b.s1+b.s2) - (a.s0+a.s1+a.s2))
-                                  .slice(0, 50);
+        function buildKualitas(wilKey) {
+            let sum1 = 0, sum2 = 0, sum0 = 0, sumOth = 0;
+            let mapWil = {}, mapPPL = {}, mapPML = {};
 
-            let tbody = document.getElementById('table-kualitas-body');
-            tbody.innerHTML = '';
-            
-            sortedPpl.forEach(p => {
-                // Highligh anomali jika 'Tidak Ditemukan' > 'Ditemukan'
-                let warningClass = (p.s0 > p.s1 && p.s0 > 0) ? 'bg-red-50 text-red-900 font-medium' : '';
+            filteredData.forEach(r => {
+                let s1 = parseInt(r['1. Ditemukan']) || 0;
+                let s2 = parseInt(r['2. Baru']) || 0;
+                let s0 = parseInt(r['0. Tidak Ditemukan']) || 0;
+                let oth = (parseInt(r['3. Meninggal'])||0) + (parseInt(r['4. Tidak Eligible'])||0) + (parseInt(r['5. Tidak dapat ditemui sampai akhir pendataan'])||0) + (parseInt(r['6. Keluarga Khusus'])||0);
                 
-                let tr = `
-                    <tr class="hover:bg-muted/50 transition-colors ${warningClass}">
-                        <td class="px-4 py-3 border-b border-border">${p.name}</td>
-                        <td class="px-4 py-3 border-b border-border text-right text-muted-foreground">${p.prelist}</td>
-                        <td class="px-4 py-3 border-b border-l border-border text-right font-medium">${p.s0}</td>
-                        <td class="px-4 py-3 border-b border-border text-right">${p.s1}</td>
-                        <td class="px-4 py-3 border-b border-border text-right">${p.s2}</td>
-                        <td class="px-4 py-3 border-b border-border text-right text-muted-foreground">${p.other}</td>
-                    </tr>
-                `;
-                tbody.insertAdjacentHTML('beforeend', tr);
+                let target = parseInt(r['Total Muatan FASIH']) || 0; // Prelist base
+                let good = s1 + s2; // Good quality proxy
+                
+                let kec = r['Nama Kec'] || '-';
+                let wil = r[wilKey] || '-';
+                let ppl = r['Nama PPL'] || '-';
+                let pml = r['Nama PML'] || '-';
+
+                sum1 += s1; sum2 += s2; sum0 += s0; sumOth += oth;
+
+                if(!mapWil[wil]) mapWil[wil] = { target:0, good:0, s0:0 };
+                mapWil[wil].target += target; mapWil[wil].good += good; mapWil[wil].s0 += s0;
+
+                if(!mapPPL[ppl]) mapPPL[ppl] = { name: ppl, kec: kec, target:0, good:0, s0:0 };
+                mapPPL[ppl].target += target; mapPPL[ppl].good += good; mapPPL[ppl].s0 += s0;
+
+                if(!mapPML[pml]) mapPML[pml] = { name: pml, kec: kec, target:0, good:0, s0:0 };
+                mapPML[pml].target += target; mapPML[pml].good += good; mapPML[pml].s0 += s0;
             });
-            
-            if(sortedPpl.length === 0){
-                 tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-muted-foreground">Tidak ada data untuk filter ini.</td></tr>`;
+
+            // Update Summary
+            document.getElementById('k-sum-1').innerText = sum1.toLocaleString('id-ID');
+            document.getElementById('k-sum-2').innerText = sum2.toLocaleString('id-ID');
+            document.getElementById('k-sum-0').innerText = sum0.toLocaleString('id-ID');
+            document.getElementById('k-sum-other').innerText = sumOth.toLocaleString('id-ID');
+
+            // Process Arrays & Sort (by % Good Quality / Target)
+            let arrWil = Object.keys(mapWil).map(k => ({ name: k, ...mapWil[k], pct: mapWil[k].target ? (mapWil[k].good/mapWil[k].target*100) : 0 })).sort((a,b) => b.pct - a.pct);
+            let arrPPL = Object.values(mapPPL).map(p => ({ ...p, pct: p.target ? (p.good/p.target*100) : 0 })).sort((a,b) => b.pct - a.pct);
+            let arrPML = Object.values(mapPML).map(p => ({ ...p, pct: p.target ? (p.good/p.target*100) : 0 })).sort((a,b) => b.pct - a.pct);
+
+            // Chart 1: Wilayah
+            renderChart('chart-qual-wil', {
+                ...getBaseChartOpt(),
+                series: [{ name: 'Rasio Ditemukan (%)', data: arrWil.map(w => w.pct.toFixed(1)) }],
+                xaxis: { categories: arrWil.map(w => w.name) },
+                colors: ['#52525b']
+            });
+
+            // Helper for Person Charts
+            function createQualChartOpts(arr, isTop) {
+                let slice = isTop ? arr.slice(0, 10) : [...arr].reverse().slice(0, 10);
+                return {
+                    ...getBaseChartOpt(),
+                    series: [{ name: 'Rasio Ditemukan (%)', data: slice.map(x => x.pct.toFixed(1)) }],
+                    xaxis: { categories: slice.map(x => x.name + ` (${x.kec})`) },
+                    colors: ['#52525b']
+                };
             }
+
+            renderChart('chart-qual-ppl-top', createQualChartOpts(arrPPL, true));
+            renderChart('chart-qual-ppl-bot', createQualChartOpts(arrPPL, false));
+            renderChart('chart-qual-pml-top', createQualChartOpts(arrPML, true));
+            renderChart('chart-qual-pml-bot', createQualChartOpts(arrPML, false));
+
+            // Tables
+            let getQualBadge = (s0, good) => {
+                if(s0 > good && s0 > 0) return `<span class="badge badge-danger">Anomali (0 > Ditemukan)</span>`;
+                return `<span class="badge badge-success">Wajar</span>`;
+            };
+
+            renderTable('dt-qual-wil', ["Wilayah", "Prelist Target", "Ditemukan+Baru", "0. Tidak Ditemukan", "Rasio Ditemukan %"], arrWil.map(w => [w.name, w.target.toString(), w.good.toString(), w.s0.toString(), w.pct.toFixed(2)+"%"]));
+            renderTable('dt-qual-ppl', ["Nama PPL", "Kecamatan", "Prelist", "Ditemukan+Baru", "0. Tidak Ditemukan", "Rasio %", "Indikasi"], arrPPL.map(p => [p.name, p.kec, p.target.toString(), p.good.toString(), p.s0.toString(), p.pct.toFixed(2)+"%", getQualBadge(p.s0, p.good)]));
+            renderTable('dt-qual-pml', ["Nama PML", "Kecamatan", "Prelist", "Ditemukan+Baru", "0. Tidak Ditemukan", "Rasio %", "Indikasi"], arrPML.map(p => [p.name, p.kec, p.target.toString(), p.good.toString(), p.s0.toString(), p.pct.toFixed(2)+"%", getQualBadge(p.s0, p.good)]));
         }
     </script>
 </body>
