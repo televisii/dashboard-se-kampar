@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Monitoring SE2026</title>
+    <!-- Tailwind CSS untuk Styling Modern -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SheetJS untuk Membaca Excel di Browser -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- ApexCharts untuk Visualisasi Interaktif -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #06b6d4;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased">
+
+    <!-- Header Banner -->
+    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50 shadow-xl backdrop-blur bg-opacity-95">
+        <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-xl sm:text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-500">
+                    MONITORING SE2026
+                </h1>
+                <p class="text-xs text-slate-400 font-medium">Sistem Integrasi Analisis Progress & Kewajaran SLS</p>
+            </div>
+            
+            <!-- Upload Control -->
+            <div class="flex items-center gap-3 bg-slate-800/80 p-2 rounded-xl border border-slate-700/60 shadow-inner w-full sm:w-auto">
+                <label for="excel-file" class="text-xs font-semibold text-slate-300 whitespace-nowrap pl-1 cursor-pointer">
+                    📁 Upload Excel ('seluruh sls'):
+                </label>
+                <input type="file" id="excel-file" accept=".xlsx, .xls" class="block w-full text-xs text-slate-400
+                  file:mr-3 file:py-1.5 file:px-3
+                  file:rounded-lg file:border-0
+                  file:text-xs file:font-bold
+                  file:bg-gradient-to-r file:from-teal-500 file:to-cyan-500 file:text-slate-950
+                  hover:file:from-teal-400 hover:file:to-cyan-400 file:transition-all
+                  cursor-pointer focus:outline-none"/>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 space-y-8">
+        
+        <!-- Welcome Screen -->
+        <div id="welcome-card" class="bg-gradient-to-b from-slate-900 to-slate-900/40 border border-slate-800/80 rounded-2xl p-10 text-center max-w-xl mx-auto my-16 shadow-2xl space-y-4">
+            <div class="inline-flex p-4 bg-teal-500/10 text-teal-400 rounded-full text-4xl shadow-inner animate-pulse">
+                📊
+            </div>
+            <h2 class="text-2xl font-bold text-slate-200">Menunggu Unggahan Berkas</h2>
+            <p class="text-sm text-slate-400 leading-relaxed">
+                Silakan masukkan file dokumen Excel hasil export monitoring SE2026 Anda yang memiliki sheet <b>'seluruh sls'</b>. Sistem akan mengolah visualisasi peta progress wilayah, performa petugas, serta deteksi kewajaran muatan prelist secara instan.
+            </p>
+        </div>
+
+        <!-- Dashboard Dashboard Layout -->
+        <div id="dashboard-content" class="hidden space-y-8 animate-fade-in">
+            
+            <!-- Summary Core KPI Metrics -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                <div class="bg-slate-900/90 p-5 rounded-2xl border border-slate-800/80 shadow-lg relative overflow-hidden group">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-slate-600"></div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Beban SLS</p>
+                    <h3 id="kpi-total-sls" class="text-2xl sm:text-3xl font-black text-slate-100 mt-2">0</h3>
+                </div>
+                <div class="bg-slate-900/90 p-5 rounded-2xl border border-slate-800/80 shadow-lg relative overflow-hidden group">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-teal-500"></div>
+                    <p class="text-xs font-bold text-teal-400 uppercase tracking-wider">Approved Pengawas</p>
+                    <h3 id="kpi-approved" class="text-2xl sm:text-3xl font-black text-teal-400 mt-2">0</h3>
+                </div>
+                <div class="bg-slate-900/90 p-5 rounded-2xl border border-slate-800/80 shadow-lg relative overflow-hidden group">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-amber-500"></div>
+                    <p class="text-xs font-bold text-amber-400 uppercase tracking-wider">Submitted Pencacah</p>
+                    <h3 id="kpi-submitted" class="text-2xl sm:text-3xl font-black text-amber-400 mt-2">0</h3>
+                </div>
+                <div class="bg-slate-900/90 p-5 rounded-2xl border border-slate-800/80 shadow-lg relative overflow-hidden group">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-rose-500"></div>
+                    <p class="text-xs font-bold text-rose-400 uppercase tracking-wider">Anomali Muatan Fasih</p>
+                    <h3 id="kpi-anomali" class="text-2xl sm:text-3xl font-black text-rose-400 mt-2">0</h3>
+                </div>
+            </div>
+
+            <!-- Analytics Visual Charts Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Progress per Wilayah (Kecamatan) -->
+                <div class="bg-slate-900/90 p-5 rounded-2xl border border-slate-800/80 shadow-xl">
+                    <div class="mb-4">
+                        <h3 class="text-sm font-bold text-slate-300 tracking-wide uppercase">📦 Progress Dokumen per Kecamatan</h3>
+                        <p class="text-xs text-slate-500">Akumulasi sebaran status pengerjaan dokumen aplikasi</p>
+                    </div>
+                    <div id="chart-kecamatan" class="w-full"></div>
+                </div>
+                
+                <!-- Rasio Analisis Kewajaran Beban Prelist vs Realita Lapangan -->
+                <div class="bg-slate-900/90 p-5 rounded-2xl border border-slate-800/80 shadow-xl">
+                    <div class="mb-4">
+                        <h3 class="text-sm font-bold text-slate-300 tracking-wide uppercase">🔍 Analisis Kewajaran Muatan per Petugas</h3>
+                        <p class="text-xs text-slate-500">Korelasi Beban Prelist Fasih (X) dengan Total Ditemukan+Baru (Y)</p>
+                    </div>
+                    <div id="chart-kewajaran" class="w-full"></div>
+                </div>
+            </div>
+
+            <!-- Automated Core Insights System -->
+            <div class="bg-gradient-to-r from-slate-900 via-slate-900 to-teal-950/20 p-6 rounded-2xl border border-slate-800/90 shadow-xl space-y-4">
+                <h3 class="text-sm font-bold text-teal-400 flex items-center gap-2 tracking-wider uppercase">
+                    💡 Executive Summary & Insight Kewajaran Data
+                </h3>
+                <div id="insight-box" class="text-sm text-slate-300 space-y-3 pl-1">
+                    <!-- Dinamis Diisi oleh Engine Analitik JS -->
+                </div>
+            </div>
+
+            <!-- Petugas Performance Master Table Data -->
+            <div class="bg-slate-900/90 rounded-2xl border border-slate-800/80 shadow-xl overflow-hidden">
+                <div class="p-5 border-b border-slate-800/80 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-300 tracking-wide uppercase">📋 Matriks Kinerja Petugas (PPL & PML)</h3>
+                        <p class="text-xs text-slate-500">Urutan kontribusi verifikasi dokumen disetujui terbanyak</p>
+                    </div>
+                    <span class="text-xs px-2.5 py-1 bg-slate-800 text-slate-400 rounded-md font-semibold border border-slate-700/50">
+                        Client-side Processed
+                    </span>
+                </div>
+                <div class="overflow-x-auto max-h-[28rem] custom-scrollbar">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead class="bg-slate-850 text-slate-400 sticky top-0 bg-slate-900 border-b border-slate-800 shadow-sm z-10">
+                            <tr>
+                                <th class="p-4 font-semibold text-slate-300">Nama PPL</th>
+                                <th class="p-4 font-semibold text-slate-300">Nama PML</th>
+                                <th class="p-4 font-semibold text-slate-300 text-center">Open</th>
+                                <th class="p-4 font-semibold text-slate-300 text-center">Draft</th>
+                                <th class="p-4 font-semibold text-slate-300 text-center">Submitted</th>
+                                <th class="p-4 font-semibold text-slate-300 text-center font-bold text-teal-400">Approved</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-petugas-body" class="divide-y divide-slate-850 text-slate-300">
+                            <!-- Dinamis Terisi oleh Data Parser -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Core App Dashboard Engine Script -->
+    <script>
+        document.getElementById('excel-file').addEventListener('change', handleFile, false);
+
+        let chartKec = null;
+        let chartKew = null;
+
+        function handleFile(e) {
+            const files = e.target.files;
+            if (!files.length) return;
+            const file = files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    
+                    // Prioritaskan sheet bernama 'seluruh sls'
+                    const sheetName = workbook.SheetNames.find(name => name.toLowerCase().includes('sls')) || workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+                    if(jsonData && jsonData.length > 0) {
+                        processDashboardData(jsonData);
+                    } else {
+                        alert("Gagal membaca data: Pastikan format atau nama kolom sesuai berkas SE2026!");
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert("Kesalahan membaca file Excel. Pastikan berkas tidak terenkripsi/rusak.");
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function processDashboardData(data) {
+            // Toggle Display UI Components
+            document.getElementById('welcome-card').classList.add('hidden');
+            document.getElementById('dashboard-content').classList.remove('hidden');
+
+            // 1. Initial State Aggregation Variables
+            let totalSls = data.length;
+            let sumOpen = 0, sumDraft = 0, sumSubmitted = 0, sumApproved = 0;
+            let anomaliCount = 0;
+
+            let kecData = {};
+            let pplData = {};
+
+            data.forEach(row => {
+                // Konversi data kolom numerik secara adaptif
+                let openVal = parseInt(row['OPEN']) || 0;
+                let draftVal = parseInt(row['DRAFT']) || 0;
+                let subVal = parseInt(row['SUBMITTED BY Pencacah']) || 0;
+                let appVal = parseInt(row['APPROVED BY Pengawas']) || 0;
+                let prelistFasih = parseInt(row['Total Muatan FASIH']) || 0;
+                let realitaDitemukan = parseInt(row['Jumlah Keluarga+Usaha']) || 0;
+
+                sumOpen += openVal;
+                sumDraft += draftVal;
+                sumSubmitted += subVal;
+                sumApproved += appVal;
+
+                // Definisi Algoritma Kewajaran Data: Deviasi antara Prelist Fasih & Realita Ditemukan > 50%
+                if (prelistFasih > 0 && Math.abs(realitaDitemukan - prelistFasih) / prelistFasih > 0.5) {
+                    anomaliCount++;
+                }
+
+                // Agregasi Level Teritorial (Kecamatan)
+                let kec = row['Nama Kec'] || 'TIDAK TERIDENTIFIKASI';
+                if (!kecData[kec]) {
+                    kecData[kec] = { open: 0, draft: 0, submitted: 0, approved: 0 };
+                }
+                kecData[kec].open += openVal;
+                kecData[kec].draft += draftVal;
+                kecData[kec].submitted += subVal;
+                kecData[kec].approved += appVal;
+
+                // Agregasi Level Sumber Daya Manusia (Petugas PPL & PML)
+                let ppl = row['Nama PPL'] || 'Petugas Tidak Terdaftar';
+                let pml = row['Nama PML'] || '-';
+                if (!pplData[ppl]) {
+                    pplData[ppl] = { name: ppl, pml: pml, open: 0, draft: 0, submitted: 0, approved: 0, prelist: 0, ditemukan: 0 };
+                }
+                pplData[ppl].open += openVal;
+                pplData[ppl].draft += draftVal;
+                pplData[ppl].submitted += subVal;
+                pplData[ppl].approved += appVal;
+                pplData[ppl].prelist += prelistFasih;
+                pplData[ppl].ditemukan += realitaDitemukan;
+            });
+
+            // Update UI Interface KPI Elements
+            document.getElementById('kpi-total-sls').innerText = totalSls.toLocaleString('id-ID');
+            document.getElementById('kpi-approved').innerText = sumApproved.toLocaleString('id-ID');
+            document.getElementById('kpi-submitted').innerText = sumSubmitted.toLocaleString('id-ID');
+            document.getElementById('kpi-anomali').innerText = anomaliCount.toLocaleString('id-ID');
+
+            // 2. Render Stacked Bar Chart Progress Teritorial Kecamatan
+            let kecCategories = Object.keys(kecData);
+            let seriesApproved = kecCategories.map(k => kecData[k].approved);
+            let seriesSubmitted = kecCategories.map(k => kecData[k].submitted);
+            let seriesOpen = kecCategories.map(k => kecData[k].open);
+
+            let optionsKec = {
+                chart: { type: 'bar', height: 380, stacked: true, toolbar: { show: true }, foreColor: '#94a3b8', fontFamily: 'sans-serif' },
+                colors: ['#06b6d4', '#fbbf24', '#334155'],
+                series: [
+                    { name: 'Approved Pengawas', data: seriesApproved },
+                    { name: 'Submitted Pencacah', data: seriesSubmitted },
+                    { name: 'Open / Unprocessed', data: seriesOpen }
+                ],
+                xaxis: { categories: kecCategories, labels: { style: { fontSize: '10px' } } },
+                legend: { position: 'top', horizontalAlign: 'left' },
+                fill: { opacity: 0.95 },
+                grid: { borderColor: '#1e293b', strokeDashArray: 4 },
+                plotOptions: { bar: { borderRadius: 4, columnWidth: '60%' } }
+            };
+
+            if(chartKec) chartKec.destroy();
+            chartKec = new ApexCharts(document.querySelector("#chart-kecamatan"), optionsKec);
+            chartKec.render();
+
+            // 3. Render Advanced Scatter Chart Kewajaran Data Performa Petugas
+            let scatterSeries = Object.values(pplData).map(p => {
+                return { x: p.prelist, y: p.ditemukan, name: p.name, pml: p.pml };
+            });
+
+            let optionsKewajaran = {
+                chart: { type: 'scatter', height: 380, zoom: { enabled: true, type: 'xy' }, foreColor: '#94a3b8', fontFamily: 'sans-serif' },
+                colors: ['#06b6d4'],
+                series: [{ name: 'Beban Muatan Kerja Petugas', data: scatterSeries }],
+                xaxis: { 
+                    title: { text: 'Target Prelist Fasih (Muatan Awal)', style: { color: '#94a3b8', fontWeight: 600 } },
+                    axisBorder: { show: false }, axisTicks: { show: false }
+                },
+                yaxis: { 
+                    title: { text: 'Realita Jumlah Keluarga + Usaha Lapangan', style: { color: '#94a3b8', fontWeight: 600 } }
+                },
+                grid: { borderColor: '#1e293b', strokeDashArray: 4 },
+                markers: { size: 6, strokeColors: '#0f172a', strokeWidth: 2, hover: { size: 8 } },
+                tooltip: {
+                    custom: function({series, seriesIndex, dataPointIndex, w}) {
+                        let point = w.config.series[seriesIndex].data[dataPointIndex];
+                        return `<div class="bg-slate-900 border border-slate-700 p-3 rounded-lg shadow-xl text-xs space-y-1">
+                                  <div class="font-bold text-teal-400 border-b border-slate-800 pb-1 mb-1">PPL: ${point.name}</div>
+                                  <div><b>PML Pengawas:</b> ${point.pml}</div>
+                                  <div><b>Prelist Fasih Target:</b> ${point.x}</div>
+                                  <div><b>Keluarga+Usaha Ditemukan:</b> ${point.y}</div>
+                                  <div class="text-[10px] pt-1 text-slate-500 font-medium">Deviasi: ${Math.abs(point.y - point.x)} muatan</div>
+                                </div>`;
+                    }
+                }
+            };
+
+            if(chartKew) chartKew.destroy();
+            chartKew = new ApexCharts(document.querySelector("#chart-kewajaran"), optionsKewajaran);
+            chartKew.render();
+
+            // 4. Data Population Master Petugas Table (Sorted Descending by Approved Status)
+            let sortedPetugas = Object.values(pplData).sort((a,b) => b.approved - a.approved);
+            let tableBody = document.getElementById('table-petugas-body');
+            tableBody.innerHTML = '';
+            
+            sortedPetugas.forEach(p => {
+                let rowHtml = `
+                    <tr class="hover:bg-slate-850/60 transition-colors border-b border-slate-850">
+                        <td class="p-4 font-semibold text-slate-200">${p.name}</td>
+                        <td class="p-4 text-slate-400 text-xs">${p.pml}</td>
+                        <td class="p-4 text-center text-slate-400 font-mono">${p.open.toLocaleString('id-ID')}</td>
+                        <td class="p-4 text-center text-amber-500/90 font-mono">${p.draft.toLocaleString('id-ID')}</td>
+                        <td class="p-4 text-center text-cyan-400 font-mono">${p.submitted.toLocaleString('id-ID')}</td>
+                        <td class="p-4 text-center font-bold text-teal-400 font-mono bg-teal-500/5">${p.approved.toLocaleString('id-ID')}</td>
+                    </tr>
+                `;
+                tableBody.insertAdjacentHTML('beforeend', rowHtml);
+            });
+
+            // 5. Advanced Automated Insight Generation Engine
+            let insightBox = document.getElementById('insight-box');
+            insightBox.innerHTML = '';
+
+            // Hitung Kecamatan dengan status Terendah vs Tertinggi
+            let sortedKecKeys = Object.keys(kecData).sort((a,b) => kecData[b].approved - kecData[a].approved);
+            let highestKec = sortedKecKeys[0] || '-';
+            let lowestKec = sortedKecKeys[sortedKecKeys.length - 1] || '-';
+
+            // Temukan Anomali Extreme Outlier (Beban lapangan naik > 2.5 kali lipat dari Target Prelist Fasih)
+            let extremeOutliers = sortedPetugas.filter(p => p.prelist > 5 && (p.ditemukan / p.prelist > 2.5));
+
+            // Append Insight Wilayah
+            insightBox.insertAdjacentHTML('beforeend', `
+                <div class="flex items-start gap-2 text-slate-300">
+                    <span class="text-teal-400 font-bold">📍</span>
+                    <span><b>Pantauan Geografis:</b> Kecamatan dengan volume persetujuan dokumen tertinggi dipimpin oleh <b>${highestKec}</b>. Sebaliknya, akselerasi pengerjaan di Kecamatan <b>${lowestKec}</b> tercatat paling rendah. Direkomendasikan melakukan re-alokasi atensi monitoring pengawasan ke wilayah tersebut.</span>
+                </div>
+            `);
+            
+            // Append Insight Kewajaran Data Khusus
+            if(extremeOutliers.length > 0) {
+                let namaOutliers = extremeOutliers.slice(0, 3).map(p => p.name).join(', ');
+                insightBox.insertAdjacentHTML('beforeend', `
+                    <div class="flex items-start gap-2 text-slate-300 bg-rose-950/20 border border-rose-900/40 p-3 rounded-xl">
+                        <span class="text-rose-400 font-bold">⚠️</span>
+                        <span><b>Indikasi Kewajaran Muatan:</b> Terdeteksi <b>${extremeOutliers.length} petugas</b> dengan lonjakan realita lapangan sangat ekstrem (>2.5x lipat target Prelist Fasih). Contoh PPL: <b>${namaOutliers}</b>. Hal ini berpotensi disebabkan oleh masifnya penemuan entitas baru atau salah klasifikasi objek SLS. Tim PML wajib melakukan uji petik kesesuaian dokumen sampel (supervisi kualitas).</span>
+                    </div>
+                `);
+            } else {
+                insightBox.insertAdjacentHTML('beforeend', `
+                    <div class="flex items-start gap-2 text-slate-300">
+                        <span class="text-emerald-400 font-bold">✅</span>
+                        <span><b>Analisis Deviasi:</b> Distribusi beban kerja seluruh petugas PPL terpantau wajar dan linier dengan target Prelist Fasih awal. Tidak ditemukan lonjakan anomali data (mass-outliers) yang mengarah pada mal-input data lapangan.</span>
+                    </div>
+                `);
+            }
+            
+            // Append Insight Target Kerja Global
+            let globalRasioApproved = ((sumApproved / (sumOpen + sumDraft + sumSubmitted + sumApproved)) * 105 || 0).toFixed(1);
+            insightBox.insertAdjacentHTML('beforeend', `
+                <div class="flex items-start gap-2 text-slate-300">
+                    <span class="text-cyan-400 font-bold">📈</span>
+                    <span><b>Rasio Efisiensi Dokumen:</b> Dari keseluruhan basis beban pengerjaan, sebanyak <b>${anomaliCount} SLS</b> masuk dalam kategori deviasi tinggi (>50% margin). Pastikan koordinasi intensif antara PPL dan PML berjalan sebelum batas waktu sinkronisasi sistem Fasih ditutup.</span>
+                </div>
+            `);
+        }
+    </script>
+</body>
+</html>
