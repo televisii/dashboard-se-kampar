@@ -3,198 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Monitoring SE2026 - BPS</title>
+    <title>Dashboard SE2026 - BPS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <link href="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.3/dist/style.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.3" type="text/javascript"></script>
 
-    <style>
-        /* Custom Scrollbar */
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #06b6d4; }
-        
-        /* Dark Theme Override for Simple-DataTables */
-        .datatable-wrapper { color: #cbd5e1; font-size: 0.875rem; }
-        .datatable-top, .datatable-bottom { padding: 1rem 0; }
-        .datatable-selector, .datatable-input { 
-            background-color: #1e293b; color: #f8fafc; border: 1px solid #334155; 
-            border-radius: 0.375rem; padding: 0.25rem 0.5rem; outline: none;
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        background: '#ffffff',
+                        foreground: '#09090b',
+                        muted: '#f4f4f5',
+                        'muted-foreground': '#71717a',
+                        border: '#e4e4e7',
+                        input: '#e4e4e7',
+                        primary: '#18181b',
+                        'primary-foreground': '#fafafa',
+                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
         }
-        .datatable-selector:focus, .datatable-input:focus { border-color: #0d9488; }
-        .datatable-table > thead > tr > th { border-bottom: 2px solid #334155; padding: 0.75rem 1rem; color: #94a3b8; font-weight: 600; text-align: left; }
-        .datatable-table > tbody > tr > td { border-bottom: 1px solid #1e293b; padding: 0.75rem 1rem; }
-        .datatable-table > tbody > tr:hover { background-color: #1e293b; }
-        .datatable-pagination .datatable-active a, 
-        .datatable-pagination .datatable-active a:focus, 
-        .datatable-pagination .datatable-active a:hover { background-color: #0d9488; color: white; cursor: default; }
-        .datatable-pagination a { color: #94a3b8; border: 1px solid transparent; }
-        .datatable-pagination a:hover { background-color: #334155; }
-        .datatable-info { color: #64748b; }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { background-color: theme('colors.background'); color: theme('colors.foreground'); }
+        /* Scrollbar ala Shadcn */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a1a1aa; }
+        .shadcn-card { background: white; border: 1px solid #e4e4e7; border-radius: 0.75rem; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); }
+        .shadcn-input { display: flex; height: 2.25rem; width: 100%; border-radius: 0.375rem; border: 1px solid #e4e4e7; background: transparent; padding: 0.5rem 0.75rem; font-size: 0.875rem; transition: colors; }
+        .shadcn-input:focus { outline: none; border-color: #18181b; ring: 1px solid #18181b; }
+        .shadcn-btn { display: inline-flex; align-items: center; justify-content: center; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 500; height: 2.25rem; padding: 0 1rem; transition: colors; cursor: pointer; }
+        .shadcn-btn-primary { background-color: #18181b; color: #fafafa; }
+        .shadcn-btn-primary:hover { background-color: #27272a; }
+        .shadcn-btn-ghost { background-color: transparent; color: #09090b; }
+        .shadcn-btn-ghost:hover { background-color: #f4f4f5; }
+        .tab-active { border-bottom: 2px solid #18181b; color: #18181b; font-weight: 600; }
+        .tab-inactive { color: #71717a; }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased">
+<body class="min-h-screen antialiased flex flex-col">
 
-    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50 shadow-xl backdrop-blur bg-opacity-95">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div>
-                <h1 class="text-xl sm:text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-500">
-                    MONITORING SE2026
-                </h1>
-                <p class="text-xs text-slate-400 font-medium">Dashboard Evaluasi Target & Kinerja Pendataan</p>
+    <header class="border-b border-border sticky top-0 bg-background/95 backdrop-blur z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight">Monitoring SE2026</h1>
+                    <p class="text-sm text-muted-foreground">Evaluasi Progress & Kualitas Data</p>
+                </div>
+                
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+                    <select id="filter-kecamatan" onchange="applyFilter()" class="shadcn-input w-full sm:w-48 bg-white cursor-pointer disabled:opacity-50" disabled>
+                        <option value="ALL">Semua Kecamatan</option>
+                    </select>
+
+                    <div class="relative">
+                        <input type="file" id="excel-file" accept=".xlsx, .xls" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                        <button class="shadcn-btn shadcn-btn-primary w-full sm:w-auto flex gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+                            Upload Data (Excel)
+                        </button>
+                    </div>
+                </div>
             </div>
-            
-            <div class="flex items-center gap-3 bg-slate-800/80 p-2 rounded-xl border border-slate-700/60 shadow-inner w-full sm:w-auto">
-                <label for="excel-file" class="text-xs font-semibold text-slate-300 whitespace-nowrap pl-1 cursor-pointer">
-                    📁 Upload Excel ('seluruh sls'):
-                </label>
-                <input type="file" id="excel-file" accept=".xlsx, .xls" class="block w-full text-xs text-slate-400
-                  file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold
-                  file:bg-gradient-to-r file:from-teal-500 file:to-cyan-500 file:text-slate-950
-                  hover:file:from-teal-400 hover:file:to-cyan-400 cursor-pointer focus:outline-none"/>
+
+            <div class="flex gap-6 mt-6 border-b border-border overflow-x-auto no-scrollbar" id="tabs-container" style="display: none;">
+                <button onclick="switchTab('progress')" id="tab-btn-progress" class="pb-3 text-sm tab-active whitespace-nowrap">Progress Pendataan</button>
+                <button onclick="switchTab('kualitas')" id="tab-btn-kualitas" class="pb-3 text-sm tab-inactive whitespace-nowrap">Kualitas Data</button>
             </div>
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
+    <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-8">
         
-        <div id="welcome-card" class="bg-gradient-to-b from-slate-900 to-slate-900/40 border border-slate-800/80 rounded-2xl p-10 text-center max-w-xl mx-auto my-16 shadow-2xl">
-            <div class="inline-flex p-4 bg-teal-500/10 text-teal-400 rounded-full text-4xl mb-4 shadow-inner animate-pulse">📊</div>
-            <h2 class="text-2xl font-bold text-slate-200 mb-2">Menunggu Data</h2>
-            <p class="text-sm text-slate-400 leading-relaxed">
-                Silakan upload file Excel hasil export monitoring SE2026 Anda. Sistem akan mengkalkulasi progress persentase dan pencapaian target harian secara otomatis.
-            </p>
+        <div id="welcome-state" class="shadcn-card p-8 sm:p-12 text-center max-w-2xl mx-auto mt-10">
+            <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+            </div>
+            <h2 class="text-lg font-semibold mb-2">Belum Ada Data Terbaca</h2>
+            <p class="text-sm text-muted-foreground mb-6">Silakan upload file Excel hasil export monitoring Fasih SE2026. Data akan diproses secara lokal di browser Anda.</p>
         </div>
 
-        <div id="dashboard-content" class="hidden space-y-6 animate-fade-in">
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-slate-900/90 p-6 rounded-2xl border border-slate-800/80 shadow-lg flex flex-col justify-center">
-                    <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wide mb-2 flex justify-between">
-                        <span>Capaian Pendataan Keseluruhan</span>
-                        <span id="global-persen-text" class="text-teal-400 text-lg">0%</span>
+        <div id="view-progress" class="hidden space-y-6 animate-in fade-in duration-500">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="shadcn-card p-5">
+                    <p class="text-sm font-medium text-muted-foreground">Total Prelist Fasih (Target)</p>
+                    <h3 id="prog-target" class="text-2xl font-bold mt-1">0</h3>
+                </div>
+                <div class="shadcn-card p-5">
+                    <p class="text-sm font-medium text-muted-foreground">Total Pengerjaan Fasih (Selesai)</p>
+                    <h3 id="prog-selesai" class="text-2xl font-bold mt-1">0</h3>
+                </div>
+                <div class="shadcn-card p-5 sm:col-span-2 flex flex-col justify-center">
+                    <div class="flex justify-between mb-2">
+                        <span class="text-sm font-medium">Persentase Pengerjaan Keseluruhan</span>
+                        <span id="prog-persen-text" class="text-sm font-bold">0%</span>
+                    </div>
+                    <div class="w-full bg-muted rounded-full h-3">
+                        <div id="prog-bar" class="bg-primary h-3 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="shadcn-card p-5 lg:col-span-2">
+                    <h3 class="text-sm font-semibold mb-4">Perbandingan Target vs Pengerjaan (Per Kecamatan)</h3>
+                    <div id="chart-progress" class="w-full min-h-[300px]"></div>
+                </div>
+                
+                <div class="shadcn-card p-5 bg-muted/30">
+                    <h3 class="text-sm font-semibold mb-3 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        Ringkasan Pengerjaan
                     </h3>
-                    <div class="w-full bg-slate-800 rounded-full h-4 mb-2 shadow-inner">
-                        <div id="global-progress-bar" class="bg-gradient-to-r from-teal-500 to-cyan-400 h-4 rounded-full transition-all duration-1000" style="width: 0%"></div>
-                    </div>
-                    <div class="flex justify-between text-xs text-slate-400 mt-1 font-mono">
-                        <span id="global-realisasi">Realisasi: 0</span>
-                        <span id="global-target">Target Prelist: 0</span>
-                    </div>
-                </div>
-
-                <div class="bg-slate-900/90 p-6 rounded-2xl border border-slate-800/80 shadow-lg relative overflow-hidden">
-                    <div id="target-indicator-bg" class="absolute top-0 right-0 w-24 h-24 bg-teal-500/10 rounded-bl-full -mr-4 -mt-4"></div>
-                    <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wide mb-3">Evaluasi Target Harian (Mulai 15 Juni 2026)</h3>
-                    
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <p class="text-xs text-slate-400 mb-1">Durasi Pelaksanaan</p>
-                            <p class="text-lg font-bold text-slate-200"><span id="target-days">0</span> Hari</p>
+                    <div id="insight-progress" class="text-sm text-muted-foreground space-y-3">
                         </div>
-                        <div>
-                            <p class="text-xs text-slate-400 mb-1">Status Kinerja</p>
-                            <p id="target-status" class="text-lg font-bold text-teal-400">Menghitung...</p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-slate-400 mb-1">Rata-rata Realisasi</p>
-                            <p class="text-lg font-bold text-amber-400"><span id="target-avg">0</span> <span class="text-xs font-normal">/petugas/hari</span></p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-slate-400 mb-1">Target BPS</p>
-                            <p class="text-lg font-bold text-slate-500">10 - 13 <span class="text-xs font-normal">/petugas/hari</span></p>
-                        </div>
-                    </div>
                 </div>
             </div>
-
-            <div class="flex space-x-1 border-b border-slate-800">
-                <button onclick="switchTab('overview')" id="btn-tab-overview" class="tab-btn px-4 py-2 text-sm font-semibold rounded-t-lg bg-slate-800 text-teal-400 border-b-2 border-teal-400">Ringkasan Grafik</button>
-                <button onclick="switchTab('kecamatan')" id="btn-tab-kecamatan" class="tab-btn px-4 py-2 text-sm font-semibold text-slate-400 hover:text-slate-200 transition-colors">Detail Kecamatan</button>
-                <button onclick="switchTab('desa')" id="btn-tab-desa" class="tab-btn px-4 py-2 text-sm font-semibold text-slate-400 hover:text-slate-200 transition-colors">Detail Desa</button>
-                <button onclick="switchTab('petugas')" id="btn-tab-petugas" class="tab-btn px-4 py-2 text-sm font-semibold text-slate-400 hover:text-slate-200 transition-colors">Kinerja Petugas</button>
-            </div>
-
-            <div id="tab-overview" class="tab-content space-y-6">
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="bg-slate-900/90 p-5 rounded-xl border border-slate-800 shadow">
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Beban SLS</p>
-                        <h3 id="kpi-total-sls" class="text-2xl font-black text-slate-100 mt-1">0</h3>
-                    </div>
-                    <div class="bg-slate-900/90 p-5 rounded-xl border border-slate-800 shadow">
-                        <p class="text-xs font-bold text-teal-400 uppercase tracking-wider">Dokumen Approved</p>
-                        <h3 id="kpi-approved" class="text-2xl font-black text-teal-400 mt-1">0</h3>
-                    </div>
-                    <div class="bg-slate-900/90 p-5 rounded-xl border border-slate-800 shadow">
-                        <p class="text-xs font-bold text-amber-400 uppercase tracking-wider">Dokumen Submitted</p>
-                        <h3 id="kpi-submitted" class="text-2xl font-black text-amber-400 mt-1">0</h3>
-                    </div>
-                    <div class="bg-slate-900/90 p-5 rounded-xl border border-slate-800 shadow">
-                        <p class="text-xs font-bold text-rose-400 uppercase tracking-wider">Anomali Muatan</p>
-                        <h3 id="kpi-anomali" class="text-2xl font-black text-rose-400 mt-1">0</h3>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="bg-slate-900/90 p-5 rounded-2xl border border-slate-800 shadow-xl">
-                        <h3 class="text-sm font-bold text-slate-300 uppercase mb-2">Progress Dokumen per Kecamatan</h3>
-                        <div id="chart-kecamatan" class="w-full"></div>
-                    </div>
-                    <div class="bg-slate-900/90 p-5 rounded-2xl border border-slate-800 shadow-xl">
-                        <h3 class="text-sm font-bold text-slate-300 uppercase mb-2">Analisis Kewajaran Beban Petugas</h3>
-                        <div id="chart-kewajaran" class="w-full"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="tab-kecamatan" class="tab-content hidden bg-slate-900/90 p-5 rounded-2xl border border-slate-800 shadow-xl">
-                <h3 class="text-lg font-bold text-slate-200 mb-4">Tabel Agregasi per Kecamatan</h3>
-                <div class="w-full overflow-x-auto">
-                    <table id="dt-kecamatan"></table>
-                </div>
-            </div>
-
-            <div id="tab-desa" class="tab-content hidden bg-slate-900/90 p-5 rounded-2xl border border-slate-800 shadow-xl">
-                <h3 class="text-lg font-bold text-slate-200 mb-4">Tabel Agregasi per Desa</h3>
-                <div class="w-full overflow-x-auto">
-                    <table id="dt-desa"></table>
-                </div>
-            </div>
-
-            <div id="tab-petugas" class="tab-content hidden bg-slate-900/90 p-5 rounded-2xl border border-slate-800 shadow-xl">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-bold text-slate-200">Rapor Kinerja Petugas Lapangan</h3>
-                    <span class="bg-slate-800 text-xs text-slate-300 px-3 py-1 rounded-full border border-slate-700">Target Ideal: 10-13 /hari</span>
-                </div>
-                <div class="w-full overflow-x-auto">
-                    <table id="dt-petugas"></table>
-                </div>
-            </div>
-
         </div>
+
+        <div id="view-kualitas" class="hidden space-y-6 animate-in fade-in duration-500">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="shadcn-card p-5">
+                    <p class="text-xs font-medium text-muted-foreground">1. Ditemukan</p>
+                    <h3 id="qual-1" class="text-xl sm:text-2xl font-bold mt-1">0</h3>
+                </div>
+                <div class="shadcn-card p-5 border-l-4 border-l-zinc-800">
+                    <p class="text-xs font-medium text-muted-foreground">2. Baru</p>
+                    <h3 id="qual-2" class="text-xl sm:text-2xl font-bold mt-1">0</h3>
+                </div>
+                <div class="shadcn-card p-5">
+                    <p class="text-xs font-medium text-muted-foreground">0. Tidak Ditemukan</p>
+                    <h3 id="qual-0" class="text-xl sm:text-2xl font-bold mt-1">0</h3>
+                </div>
+                <div class="shadcn-card p-5 bg-muted/30">
+                    <p class="text-xs font-medium text-muted-foreground">Status Lainnya (3,4,5,6)</p>
+                    <h3 id="qual-other" class="text-xl sm:text-2xl font-bold mt-1">0</h3>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="shadcn-card p-5 lg:col-span-1 flex flex-col justify-center items-center">
+                    <h3 class="text-sm font-semibold mb-4 w-full text-left">Komposisi Status Ditemukan</h3>
+                    <div id="chart-kualitas" class="w-full flex justify-center"></div>
+                </div>
+
+                <div class="shadcn-card p-5 lg:col-span-2 overflow-hidden flex flex-col">
+                    <h3 class="text-sm font-semibold mb-4">Rincian Kualitas Data per Petugas (Top 50)</h3>
+                    <div class="overflow-x-auto flex-1 custom-scrollbar">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-xs text-muted-foreground bg-muted/50 uppercase border-b border-border">
+                                <tr>
+                                    <th class="px-4 py-3 font-medium whitespace-nowrap">Nama PPL</th>
+                                    <th class="px-4 py-3 font-medium whitespace-nowrap text-right">Prelist</th>
+                                    <th class="px-4 py-3 font-medium whitespace-nowrap text-right border-l border-border">0. Tidak Ditemukan</th>
+                                    <th class="px-4 py-3 font-medium whitespace-nowrap text-right">1. Ditemukan</th>
+                                    <th class="px-4 py-3 font-medium whitespace-nowrap text-right">2. Baru</th>
+                                    <th class="px-4 py-3 font-medium whitespace-nowrap text-right">Lainnya</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-kualitas-body" class="divide-y divide-border">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <script>
-        // Tab Logic
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(el => {
-                el.classList.remove('bg-slate-800', 'text-teal-400', 'border-b-2', 'border-teal-400');
-                el.classList.add('text-slate-400');
-            });
-            document.getElementById('tab-' + tabId).classList.remove('hidden');
-            let activeBtn = document.getElementById('btn-tab-' + tabId);
-            activeBtn.classList.remove('text-slate-400');
-            activeBtn.classList.add('bg-slate-800', 'text-teal-400', 'border-b-2', 'border-teal-400');
-        }
+        // Global variables
+        let rawData = [];
+        let filteredData = [];
+        let chartProgInstance = null;
+        let chartQualInstance = null;
 
+        // Event Listeners
         document.getElementById('excel-file').addEventListener('change', handleFile, false);
 
-        let chartKec = null, chartKew = null;
-        let dtKecInstance = null, dtDesaInstance = null, dtPetugasInstance = null;
+        // UI Tabs Logic
+        function switchTab(tab) {
+            document.getElementById('view-progress').classList.add('hidden');
+            document.getElementById('view-kualitas').classList.add('hidden');
+            
+            document.getElementById('tab-btn-progress').className = 'pb-3 text-sm tab-inactive whitespace-nowrap';
+            document.getElementById('tab-btn-kualitas').className = 'pb-3 text-sm tab-inactive whitespace-nowrap';
+
+            document.getElementById('view-' + tab).classList.remove('hidden');
+            document.getElementById('tab-btn-' + tab).className = 'pb-3 text-sm tab-active whitespace-nowrap';
+            
+            // Rerender charts to fix width bug when hidden
+            if(tab === 'progress' && chartProgInstance) chartProgInstance.render();
+            if(tab === 'kualitas' && chartQualInstance) chartQualInstance.render();
+        }
 
         function handleFile(e) {
             const files = e.target.files;
@@ -207,200 +214,192 @@
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, {type: 'array'});
                     const sheetName = workbook.SheetNames.find(name => name.toLowerCase().includes('sls')) || workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[sheetName];
-                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                    rawData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
-                    if(jsonData && jsonData.length > 0) {
-                        processDashboardData(jsonData);
-                    } else {
-                        alert("Gagal membaca data: Sheet kosong.");
+                    if(rawData && rawData.length > 0) {
+                        populateFilter();
+                        applyFilter(); // Trigger render
+                        document.getElementById('welcome-state').classList.add('hidden');
+                        document.getElementById('tabs-container').style.display = 'flex';
+                        switchTab('progress');
                     }
                 } catch (err) {
-                    console.error(err);
-                    alert("Gagal membaca Excel.");
+                    alert("Gagal membaca file Excel. Pastikan format benar.");
                 }
             };
             reader.readAsArrayBuffer(file);
         }
 
-        function getPercentHtml(realisasi, target) {
-            if(target === 0) return '0%';
-            let p = ((realisasi/target)*100).toFixed(1);
-            let color = p >= 100 ? 'text-teal-400' : (p >= 50 ? 'text-amber-400' : 'text-rose-400');
-            return `<span class="font-bold ${color}">${p}%</span>`;
+        function populateFilter() {
+            let select = document.getElementById('filter-kecamatan');
+            select.innerHTML = '<option value="ALL">Semua Kecamatan</option>';
+            let kecs = new Set();
+            rawData.forEach(row => {
+                let k = row['Nama Kec'];
+                if(k) kecs.add(k);
+            });
+            Array.from(kecs).sort().forEach(k => {
+                select.innerHTML += `<option value="${k}">${k}</option>`;
+            });
+            select.disabled = false;
         }
 
-        function processDashboardData(data) {
-            document.getElementById('welcome-card').classList.add('hidden');
-            document.getElementById('dashboard-content').classList.remove('hidden');
-
-            let totalSls = data.length;
-            let sumOpen = 0, sumDraft = 0, sumSubmitted = 0, sumApproved = 0;
-            let anomaliCount = 0;
-            let globalTargetPrelist = 0;
-            let globalRealisasi = 0;
-
-            let kecData = {}, desaData = {}, pplData = {};
-
-            data.forEach(row => {
-                let openVal = parseInt(row['OPEN']) || 0;
-                let draftVal = parseInt(row['DRAFT']) || 0;
-                let subVal = parseInt(row['SUBMITTED BY Pencacah']) || 0;
-                let appVal = parseInt(row['APPROVED BY Pengawas']) || 0;
-                
-                let prelistFasih = parseInt(row['Total Muatan FASIH']) || parseInt(row['JumlahUsahaPrelist (UMKM dan ST)']) || 0;
-                let realitaDitemukan = parseInt(row['Jumlah Keluarga+Usaha']) || parseInt(row['Jumlah Submit']) || 0;
-
-                sumOpen += openVal; sumDraft += draftVal; sumSubmitted += subVal; sumApproved += appVal;
-                globalTargetPrelist += prelistFasih;
-                globalRealisasi += realitaDitemukan;
-
-                if (prelistFasih > 0 && Math.abs(realitaDitemukan - prelistFasih) / prelistFasih > 0.5) {
-                    anomaliCount++;
-                }
-
-                // Grouping Kecamatan
-                let kec = row['Nama Kec'] || 'Tanpa Kecamatan';
-                if (!kecData[kec]) kecData[kec] = { target:0, realisasi:0, open:0, draft:0, submitted:0, approved:0, sls:0 };
-                kecData[kec].sls += 1;
-                kecData[kec].target += prelistFasih;
-                kecData[kec].realisasi += realitaDitemukan;
-                kecData[kec].open += openVal; kecData[kec].submitted += subVal; kecData[kec].approved += appVal;
-
-                // Grouping Desa
-                let desa = row['Nama Desa'] || 'Tanpa Desa';
-                let kecDesaKey = kec + " - " + desa;
-                if (!desaData[kecDesaKey]) desaData[kecDesaKey] = { kec: kec, desa: desa, target:0, realisasi:0, sls:0 };
-                desaData[kecDesaKey].sls += 1;
-                desaData[kecDesaKey].target += prelistFasih;
-                desaData[kecDesaKey].realisasi += realitaDitemukan;
-
-                // Grouping PPL
-                let ppl = row['Nama PPL'] || 'Tanpa Nama';
-                let pml = row['Nama PML'] || '-';
-                if (!pplData[ppl]) pplData[ppl] = { name: ppl, pml: pml, kec: kec, target: 0, realisasi: 0, app: 0 };
-                pplData[ppl].target += prelistFasih;
-                pplData[ppl].realisasi += realitaDitemukan;
-                pplData[ppl].app += appVal;
-            });
-
-            // --- 1. GLOBAL PROGRESS & TARGET CALCULATION ---
-            let globalPersen = globalTargetPrelist > 0 ? ((globalRealisasi / globalTargetPrelist) * 100).toFixed(1) : 0;
-            document.getElementById('global-persen-text').innerText = globalPersen + "%";
-            document.getElementById('global-progress-bar').style.width = Math.min(globalPersen, 100) + "%";
-            document.getElementById('global-realisasi').innerText = "Realisasi: " + globalRealisasi.toLocaleString('id-ID');
-            document.getElementById('global-target').innerText = "Target Prelist: " + globalTargetPrelist.toLocaleString('id-ID');
-
-            // Kalkulasi Target Harian (Mulai 15 Juni 2026 ke Tanggal Hari Ini)
-            const startDate = new Date('2026-06-15');
-            const today = new Date(); // Asumsi user membuka pada tanggal terkini
-            let elapsedDays = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
-            if (elapsedDays < 1) elapsedDays = 1; 
-            
-            let totalPetugas = Object.keys(pplData).length;
-            let targetAvg = totalPetugas > 0 ? (globalRealisasi / totalPetugas / elapsedDays).toFixed(1) : 0;
-            
-            document.getElementById('target-days').innerText = elapsedDays;
-            document.getElementById('target-avg').innerText = targetAvg;
-            
-            let statusEl = document.getElementById('target-status');
-            let bgIndicator = document.getElementById('target-indicator-bg');
-            if(parseFloat(targetAvg) >= 10) {
-                statusEl.innerText = "ON TRACK ✅";
-                statusEl.className = "text-lg font-bold text-teal-400";
-                bgIndicator.className = "absolute top-0 right-0 w-24 h-24 bg-teal-500/10 rounded-bl-full -mr-4 -mt-4";
+        function applyFilter() {
+            let filterVal = document.getElementById('filter-kecamatan').value;
+            if (filterVal === 'ALL') {
+                filteredData = rawData;
             } else {
-                statusEl.innerText = "DI BAWAH TARGET ⚠️";
-                statusEl.className = "text-lg font-bold text-rose-400";
-                bgIndicator.className = "absolute top-0 right-0 w-24 h-24 bg-rose-500/10 rounded-bl-full -mr-4 -mt-4";
+                filteredData = rawData.filter(row => row['Nama Kec'] === filterVal);
             }
+            renderDashboardProgress();
+            renderDashboardKualitas();
+        }
 
-            // Update KPI Cards
-            document.getElementById('kpi-total-sls').innerText = totalSls.toLocaleString('id-ID');
-            document.getElementById('kpi-approved').innerText = sumApproved.toLocaleString('id-ID');
-            document.getElementById('kpi-submitted').innerText = sumSubmitted.toLocaleString('id-ID');
-            document.getElementById('kpi-anomali').innerText = anomaliCount.toLocaleString('id-ID');
+        // ================= DASHBOARD 1: PROGRESS =================
+        function renderDashboardProgress() {
+            let targetTotal = 0;
+            let selesaiTotal = 0;
+            let kecGroup = {};
 
-            // --- 2. UPDATE CHARTS ---
-            let kecCategories = Object.keys(kecData);
-            if(chartKec) chartKec.destroy();
-            chartKec = new ApexCharts(document.querySelector("#chart-kecamatan"), {
-                chart: { type: 'bar', height: 320, stacked: true, toolbar: { show: false }, foreColor: '#94a3b8' },
-                colors: ['#0d9488', '#d97706', '#334155'],
-                series: [
-                    { name: 'Approved', data: kecCategories.map(k => kecData[k].approved) },
-                    { name: 'Submitted', data: kecCategories.map(k => kecData[k].submitted) },
-                    { name: 'Open', data: kecCategories.map(k => kecData[k].open) }
-                ],
-                xaxis: { categories: kecCategories },
-                legend: { position: 'top' },
-                plotOptions: { bar: { borderRadius: 2 } }
+            filteredData.forEach(row => {
+                let target = parseInt(row['Total Muatan FASIH']) || 0;
+                let pengerjaan = parseInt(row['Total Pengerjaan Fasih']) || 0;
+                let kec = row['Nama Kec'] || 'Unknown';
+
+                targetTotal += target;
+                selesaiTotal += pengerjaan;
+
+                if(!kecGroup[kec]) kecGroup[kec] = { target: 0, selesai: 0 };
+                kecGroup[kec].target += target;
+                kecGroup[kec].selesai += pengerjaan;
             });
-            chartKec.render();
 
-            if(chartKew) chartKew.destroy();
-            chartKew = new ApexCharts(document.querySelector("#chart-kewajaran"), {
-                chart: { type: 'scatter', height: 320, foreColor: '#94a3b8' },
-                colors: ['#0ea5e9'],
-                series: [{ name: 'Beban Petugas', data: Object.values(pplData).map(p => ({ x: p.target, y: p.realisasi, name: p.name })) }],
-                xaxis: { title: { text: 'Target Prelist' } }, yaxis: { title: { text: 'Realisasi Ditemukan' } },
-                tooltip: {
-                    custom: function({series, seriesIndex, dataPointIndex, w}) {
-                        let pt = w.config.series[seriesIndex].data[dataPointIndex];
-                        return `<div class="p-2 bg-slate-800 border border-slate-700 text-xs"><b>${pt.name}</b><br/>Target: ${pt.x}<br/>Realisasi: ${pt.y}</div>`;
-                    }
-                }
-            });
-            chartKew.render();
-
-            // --- 3. INITIALIZE DATATABLES ---
+            // Update UI
+            document.getElementById('prog-target').innerText = targetTotal.toLocaleString('id-ID');
+            document.getElementById('prog-selesai').innerText = selesaiTotal.toLocaleString('id-ID');
             
-            // Format Array untuk Datatable Kecamatan
-            let arrKec = Object.keys(kecData).map(k => [
-                k, 
-                kecData[k].sls.toString(), 
-                kecData[k].target.toLocaleString(), 
-                kecData[k].realisasi.toLocaleString(), 
-                getPercentHtml(kecData[k].realisasi, kecData[k].target)
-            ]);
-            if(dtKecInstance) dtKecInstance.destroy();
-            dtKecInstance = new simpleDatatables.DataTable("#dt-kecamatan", {
-                data: { headings: ["Kecamatan", "Jml SLS", "Target Muatan", "Realisasi Ditemukan", "Progress"], data: arrKec },
-                searchable: true, fixedHeight: true, perPage: 10
-            });
+            let persen = targetTotal > 0 ? ((selesaiTotal / targetTotal) * 100).toFixed(1) : 0;
+            document.getElementById('prog-persen-text').innerText = persen + "%";
+            document.getElementById('prog-bar').style.width = Math.min(persen, 100) + "%";
 
-            // Format Array untuk Datatable Desa
-            let arrDesa = Object.values(desaData).map(d => [
-                d.kec, 
-                d.desa, 
-                d.sls.toString(), 
-                d.target.toLocaleString(), 
-                d.realisasi.toLocaleString(), 
-                getPercentHtml(d.realisasi, d.target)
-            ]);
-            if(dtDesaInstance) dtDesaInstance.destroy();
-            dtDesaInstance = new simpleDatatables.DataTable("#dt-desa", {
-                data: { headings: ["Kecamatan", "Desa", "Jml SLS", "Target Muatan", "Realisasi Ditemukan", "Progress"], data: arrDesa },
-                searchable: true, fixedHeight: true, perPage: 10
-            });
+            // Chart Progress
+            let categories = Object.keys(kecGroup);
+            let dataTarget = categories.map(k => kecGroup[k].target);
+            let dataSelesai = categories.map(k => kecGroup[k].selesai);
 
-            // Format Array untuk Datatable Petugas
-            let arrPetugas = Object.values(pplData).map(p => {
-                let daily = elapsedDays > 0 ? (p.realisasi / elapsedDays).toFixed(1) : 0;
-                let statusBadge = daily >= 10 
-                    ? `<span class="bg-teal-900/50 text-teal-400 px-2 py-1 rounded text-xs font-bold border border-teal-700">On Track</span>` 
-                    : `<span class="bg-rose-900/50 text-rose-400 px-2 py-1 rounded text-xs font-bold border border-rose-700">Di Bawah Target</span>`;
+            let optProg = {
+                series: [{ name: 'Prelist Fasih (Target)', data: dataTarget }, { name: 'Pengerjaan Fasih (Selesai)', data: dataSelesai }],
+                chart: { type: 'bar', height: 350, toolbar: { show: false }, fontFamily: 'Inter, sans-serif' },
+                plotOptions: { bar: { horizontal: false, columnWidth: '60%', borderRadius: 3 } },
+                dataLabels: { enabled: false },
+                stroke: { show: true, width: 2, colors: ['transparent'] },
+                xaxis: { categories: categories, labels: { style: { colors: '#71717a' } } },
+                yaxis: { labels: { style: { colors: '#71717a' } } },
+                colors: ['#d4d4d8', '#18181b'], // Abu-abu dan Hitam Shadcn
+                fill: { opacity: 1 },
+                legend: { position: 'top', horizontalAlign: 'left', labels: { colors: '#09090b' } },
+                grid: { borderColor: '#e4e4e7', strokeDashArray: 4 }
+            };
+
+            if(chartProgInstance) chartProgInstance.destroy();
+            chartProgInstance = new ApexCharts(document.querySelector("#chart-progress"), optProg);
+            chartProgInstance.render();
+
+            // Insight Logic
+            let deficit = targetTotal - selesaiTotal;
+            let divInsight = document.getElementById('insight-progress');
+            divInsight.innerHTML = '';
+            
+            if (deficit <= 0 && targetTotal > 0) {
+                divInsight.innerHTML = `<p><b>Pengerjaan Tuntas!</b> Seluruh target Prelist Fasih telah dikerjakan atau bahkan melebihi target.</p>`;
+            } else {
+                divInsight.innerHTML = `<p>Sisa dokumen pengerjaan fasih yang masih perlu diselesaikan adalah <b>${deficit.toLocaleString('id-ID')} dokumen</b>.</p>`;
+            }
+            if (categories.length > 1) {
+                let lowestKec = categories.reduce((a, b) => (kecGroup[a].selesai/kecGroup[a].target) < (kecGroup[b].selesai/kecGroup[b].target) ? a : b);
+                divInsight.innerHTML += `<p class="mt-2 text-red-600">Perhatian: Kecamatan <b>${lowestKec}</b> memiliki rasio penyelesaian paling lambat dibandingkan wilayah lain yang ditampilkan.</p>`;
+            }
+        }
+
+        // ================= DASHBOARD 2: KUALITAS =================
+        function renderDashboardKualitas() {
+            let sum0 = 0, sum1 = 0, sum2 = 0, sumOther = 0;
+            let pplGroup = {};
+
+            filteredData.forEach(row => {
+                let s0 = parseInt(row['0. Tidak Ditemukan']) || 0;
+                let s1 = parseInt(row['1. Ditemukan']) || 0;
+                let s2 = parseInt(row['2. Baru']) || 0;
+                let s3 = parseInt(row['3. Meninggal']) || 0;
+                let s4 = parseInt(row['4. Tidak Eligible']) || 0;
+                let s5 = parseInt(row['5. Tidak dapat ditemui sampai akhir pendataan']) || 0;
+                let s6 = parseInt(row['6. Keluarga Khusus']) || 0;
                 
-                return [
-                    p.name, p.pml, p.kec, p.target.toLocaleString(), p.realisasi.toLocaleString(), 
-                    daily + " /hari", statusBadge, p.app.toString()
-                ];
+                let target = parseInt(row['Total Muatan FASIH']) || 0;
+                let other = s3 + s4 + s5 + s6;
+
+                sum0 += s0; sum1 += s1; sum2 += s2; sumOther += other;
+
+                let ppl = row['Nama PPL'] || 'Tidak Diketahui';
+                if(!pplGroup[ppl]) pplGroup[ppl] = { prelist:0, s0:0, s1:0, s2:0, other:0 };
+                pplGroup[ppl].prelist += target;
+                pplGroup[ppl].s0 += s0;
+                pplGroup[ppl].s1 += s1;
+                pplGroup[ppl].s2 += s2;
+                pplGroup[ppl].other += other;
             });
-            if(dtPetugasInstance) dtPetugasInstance.destroy();
-            dtPetugasInstance = new simpleDatatables.DataTable("#dt-petugas", {
-                data: { headings: ["PPL", "PML", "Kecamatan", "Target Muatan", "Realisasi", "Rata-rata Harian", "Status Kinerja", "Dokumen Approved"], data: arrPetugas },
-                searchable: true, fixedHeight: true, perPage: 15
+
+            // Update UI
+            document.getElementById('qual-0').innerText = sum0.toLocaleString('id-ID');
+            document.getElementById('qual-1').innerText = sum1.toLocaleString('id-ID');
+            document.getElementById('qual-2').innerText = sum2.toLocaleString('id-ID');
+            document.getElementById('qual-other').innerText = sumOther.toLocaleString('id-ID');
+
+            // Donut Chart Kualitas
+            let optQual = {
+                series: [sum1, sum2, sum0, sumOther],
+                labels: ['1. Ditemukan', '2. Baru', '0. Tidak Ditemukan', 'Lainnya (3,4,5,6)'],
+                chart: { type: 'donut', height: 320, fontFamily: 'Inter, sans-serif' },
+                colors: ['#18181b', '#52525b', '#a1a1aa', '#e4e4e7'], // Skema monokrom / grayscale
+                plotOptions: { pie: { donut: { size: '60%' } } },
+                dataLabels: { enabled: false },
+                legend: { position: 'bottom', labels: { colors: '#09090b' } },
+                stroke: { width: 1, colors: ['#ffffff'] }
+            };
+
+            if(chartQualInstance) chartQualInstance.destroy();
+            chartQualInstance = new ApexCharts(document.querySelector("#chart-kualitas"), optQual);
+            chartQualInstance.render();
+
+            // Table Petugas (Top 50 by volume input)
+            let sortedPpl = Object.keys(pplGroup)
+                                  .map(k => ({ name: k, ...pplGroup[k] }))
+                                  .sort((a, b) => (b.s0+b.s1+b.s2) - (a.s0+a.s1+a.s2))
+                                  .slice(0, 50);
+
+            let tbody = document.getElementById('table-kualitas-body');
+            tbody.innerHTML = '';
+            
+            sortedPpl.forEach(p => {
+                // Highligh anomali jika 'Tidak Ditemukan' > 'Ditemukan'
+                let warningClass = (p.s0 > p.s1 && p.s0 > 0) ? 'bg-red-50 text-red-900 font-medium' : '';
+                
+                let tr = `
+                    <tr class="hover:bg-muted/50 transition-colors ${warningClass}">
+                        <td class="px-4 py-3 border-b border-border">${p.name}</td>
+                        <td class="px-4 py-3 border-b border-border text-right text-muted-foreground">${p.prelist}</td>
+                        <td class="px-4 py-3 border-b border-l border-border text-right font-medium">${p.s0}</td>
+                        <td class="px-4 py-3 border-b border-border text-right">${p.s1}</td>
+                        <td class="px-4 py-3 border-b border-border text-right">${p.s2}</td>
+                        <td class="px-4 py-3 border-b border-border text-right text-muted-foreground">${p.other}</td>
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', tr);
             });
+            
+            if(sortedPpl.length === 0){
+                 tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-muted-foreground">Tidak ada data untuk filter ini.</td></tr>`;
+            }
         }
     </script>
 </body>
