@@ -3,169 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Monitoring SE2026</title>
-    <!-- Tailwind CSS untuk Styling Modern -->
+    <title>Dashboard Monitoring SE2026 - BPS</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- SheetJS untuk Membaca Excel di Browser -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <!-- ApexCharts untuk Visualisasi Interaktif -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <link href="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.3/dist/style.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.3" type="text/javascript"></script>
+
     <style>
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #06b6d4; }
+        
+        /* Dark Theme Override for Simple-DataTables */
+        .datatable-wrapper { color: #cbd5e1; font-size: 0.875rem; }
+        .datatable-top, .datatable-bottom { padding: 1rem 0; }
+        .datatable-selector, .datatable-input { 
+            background-color: #1e293b; color: #f8fafc; border: 1px solid #334155; 
+            border-radius: 0.375rem; padding: 0.25rem 0.5rem; outline: none;
         }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #1e293b;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #475569;
-            border-radius: 3px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #06b6d4;
-        }
+        .datatable-selector:focus, .datatable-input:focus { border-color: #0d9488; }
+        .datatable-table > thead > tr > th { border-bottom: 2px solid #334155; padding: 0.75rem 1rem; color: #94a3b8; font-weight: 600; text-align: left; }
+        .datatable-table > tbody > tr > td { border-bottom: 1px solid #1e293b; padding: 0.75rem 1rem; }
+        .datatable-table > tbody > tr:hover { background-color: #1e293b; }
+        .datatable-pagination .datatable-active a, 
+        .datatable-pagination .datatable-active a:focus, 
+        .datatable-pagination .datatable-active a:hover { background-color: #0d9488; color: white; cursor: default; }
+        .datatable-pagination a { color: #94a3b8; border: 1px solid transparent; }
+        .datatable-pagination a:hover { background-color: #334155; }
+        .datatable-info { color: #64748b; }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased">
 
-    <!-- Header Banner -->
     <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50 shadow-xl backdrop-blur bg-opacity-95">
-        <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
             <div>
                 <h1 class="text-xl sm:text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-500">
                     MONITORING SE2026
                 </h1>
-                <p class="text-xs text-slate-400 font-medium">Sistem Integrasi Analisis Progress & Kewajaran SLS</p>
+                <p class="text-xs text-slate-400 font-medium">Dashboard Evaluasi Target & Kinerja Pendataan</p>
             </div>
             
-            <!-- Upload Control -->
             <div class="flex items-center gap-3 bg-slate-800/80 p-2 rounded-xl border border-slate-700/60 shadow-inner w-full sm:w-auto">
                 <label for="excel-file" class="text-xs font-semibold text-slate-300 whitespace-nowrap pl-1 cursor-pointer">
                     📁 Upload Excel ('seluruh sls'):
                 </label>
                 <input type="file" id="excel-file" accept=".xlsx, .xls" class="block w-full text-xs text-slate-400
-                  file:mr-3 file:py-1.5 file:px-3
-                  file:rounded-lg file:border-0
-                  file:text-xs file:font-bold
+                  file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold
                   file:bg-gradient-to-r file:from-teal-500 file:to-cyan-500 file:text-slate-950
-                  hover:file:from-teal-400 hover:file:to-cyan-400 file:transition-all
-                  cursor-pointer focus:outline-none"/>
+                  hover:file:from-teal-400 hover:file:to-cyan-400 cursor-pointer focus:outline-none"/>
             </div>
         </div>
     </header>
 
-    <!-- Main Workspace -->
-    <main class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 space-y-8">
+    <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
         
-        <!-- Welcome Screen -->
-        <div id="welcome-card" class="bg-gradient-to-b from-slate-900 to-slate-900/40 border border-slate-800/80 rounded-2xl p-10 text-center max-w-xl mx-auto my-16 shadow-2xl space-y-4">
-            <div class="inline-flex p-4 bg-teal-500/10 text-teal-400 rounded-full text-4xl shadow-inner animate-pulse">
-                📊
-            </div>
-            <h2 class="text-2xl font-bold text-slate-200">Menunggu Unggahan Berkas</h2>
+        <div id="welcome-card" class="bg-gradient-to-b from-slate-900 to-slate-900/40 border border-slate-800/80 rounded-2xl p-10 text-center max-w-xl mx-auto my-16 shadow-2xl">
+            <div class="inline-flex p-4 bg-teal-500/10 text-teal-400 rounded-full text-4xl mb-4 shadow-inner animate-pulse">📊</div>
+            <h2 class="text-2xl font-bold text-slate-200 mb-2">Menunggu Data</h2>
             <p class="text-sm text-slate-400 leading-relaxed">
-                Silakan masukkan file dokumen Excel hasil export monitoring SE2026 Anda yang memiliki sheet <b>'seluruh sls'</b>. Sistem akan mengolah visualisasi peta progress wilayah, performa petugas, serta deteksi kewajaran muatan prelist secara instan.
+                Silakan upload file Excel hasil export monitoring SE2026 Anda. Sistem akan mengkalkulasi progress persentase dan pencapaian target harian secara otomatis.
             </p>
         </div>
 
-        <!-- Dashboard Dashboard Layout -->
-        <div id="dashboard-content" class="hidden space-y-8 animate-fade-in">
+        <div id="dashboard-content" class="hidden space-y-6 animate-fade-in">
             
-            <!-- Summary Core KPI Metrics -->
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                <div class="bg-slate-900/90 p-5 rounded-2xl border border-slate-800/80 shadow-lg relative overflow-hidden group">
-                    <div class="absolute top-0 left-0 w-1 h-full bg-slate-600"></div>
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Beban SLS</p>
-                    <h3 id="kpi-total-sls" class="text-2xl sm:text-3xl font-black text-slate-100 mt-2">0</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-slate-900/90 p-6 rounded-2xl border border-slate-800/80 shadow-lg flex flex-col justify-center">
+                    <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wide mb-2 flex justify-between">
+                        <span>Capaian Pendataan Keseluruhan</span>
+                        <span id="global-persen-text" class="text-teal-400 text-lg">0%</span>
+                    </h3>
+                    <div class="w-full bg-slate-800 rounded-full h-4 mb-2 shadow-inner">
+                        <div id="global-progress-bar" class="bg-gradient-to-r from-teal-500 to-cyan-400 h-4 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-slate-400 mt-1 font-mono">
+                        <span id="global-realisasi">Realisasi: 0</span>
+                        <span id="global-target">Target Prelist: 0</span>
+                    </div>
                 </div>
-                <div class="bg-slate-900/90 p-5 rounded-2xl border border-slate-800/80 shadow-lg relative overflow-hidden group">
-                    <div class="absolute top-0 left-0 w-1 h-full bg-teal-500"></div>
-                    <p class="text-xs font-bold text-teal-400 uppercase tracking-wider">Approved Pengawas</p>
-                    <h3 id="kpi-approved" class="text-2xl sm:text-3xl font-black text-teal-400 mt-2">0</h3>
-                </div>
-                <div class="bg-slate-900/90 p-5 rounded-2xl border border-slate-800/80 shadow-lg relative overflow-hidden group">
-                    <div class="absolute top-0 left-0 w-1 h-full bg-amber-500"></div>
-                    <p class="text-xs font-bold text-amber-400 uppercase tracking-wider">Submitted Pencacah</p>
-                    <h3 id="kpi-submitted" class="text-2xl sm:text-3xl font-black text-amber-400 mt-2">0</h3>
-                </div>
-                <div class="bg-slate-900/90 p-5 rounded-2xl border border-slate-800/80 shadow-lg relative overflow-hidden group">
-                    <div class="absolute top-0 left-0 w-1 h-full bg-rose-500"></div>
-                    <p class="text-xs font-bold text-rose-400 uppercase tracking-wider">Anomali Muatan Fasih</p>
-                    <h3 id="kpi-anomali" class="text-2xl sm:text-3xl font-black text-rose-400 mt-2">0</h3>
+
+                <div class="bg-slate-900/90 p-6 rounded-2xl border border-slate-800/80 shadow-lg relative overflow-hidden">
+                    <div id="target-indicator-bg" class="absolute top-0 right-0 w-24 h-24 bg-teal-500/10 rounded-bl-full -mr-4 -mt-4"></div>
+                    <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wide mb-3">Evaluasi Target Harian (Mulai 15 Juni 2026)</h3>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-xs text-slate-400 mb-1">Durasi Pelaksanaan</p>
+                            <p class="text-lg font-bold text-slate-200"><span id="target-days">0</span> Hari</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400 mb-1">Status Kinerja</p>
+                            <p id="target-status" class="text-lg font-bold text-teal-400">Menghitung...</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400 mb-1">Rata-rata Realisasi</p>
+                            <p class="text-lg font-bold text-amber-400"><span id="target-avg">0</span> <span class="text-xs font-normal">/petugas/hari</span></p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400 mb-1">Target BPS</p>
+                            <p class="text-lg font-bold text-slate-500">10 - 13 <span class="text-xs font-normal">/petugas/hari</span></p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Analytics Visual Charts Grid -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Progress per Wilayah (Kecamatan) -->
-                <div class="bg-slate-900/90 p-5 rounded-2xl border border-slate-800/80 shadow-xl">
-                    <div class="mb-4">
-                        <h3 class="text-sm font-bold text-slate-300 tracking-wide uppercase">📦 Progress Dokumen per Kecamatan</h3>
-                        <p class="text-xs text-slate-500">Akumulasi sebaran status pengerjaan dokumen aplikasi</p>
+            <div class="flex space-x-1 border-b border-slate-800">
+                <button onclick="switchTab('overview')" id="btn-tab-overview" class="tab-btn px-4 py-2 text-sm font-semibold rounded-t-lg bg-slate-800 text-teal-400 border-b-2 border-teal-400">Ringkasan Grafik</button>
+                <button onclick="switchTab('kecamatan')" id="btn-tab-kecamatan" class="tab-btn px-4 py-2 text-sm font-semibold text-slate-400 hover:text-slate-200 transition-colors">Detail Kecamatan</button>
+                <button onclick="switchTab('desa')" id="btn-tab-desa" class="tab-btn px-4 py-2 text-sm font-semibold text-slate-400 hover:text-slate-200 transition-colors">Detail Desa</button>
+                <button onclick="switchTab('petugas')" id="btn-tab-petugas" class="tab-btn px-4 py-2 text-sm font-semibold text-slate-400 hover:text-slate-200 transition-colors">Kinerja Petugas</button>
+            </div>
+
+            <div id="tab-overview" class="tab-content space-y-6">
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-slate-900/90 p-5 rounded-xl border border-slate-800 shadow">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Beban SLS</p>
+                        <h3 id="kpi-total-sls" class="text-2xl font-black text-slate-100 mt-1">0</h3>
                     </div>
-                    <div id="chart-kecamatan" class="w-full"></div>
+                    <div class="bg-slate-900/90 p-5 rounded-xl border border-slate-800 shadow">
+                        <p class="text-xs font-bold text-teal-400 uppercase tracking-wider">Dokumen Approved</p>
+                        <h3 id="kpi-approved" class="text-2xl font-black text-teal-400 mt-1">0</h3>
+                    </div>
+                    <div class="bg-slate-900/90 p-5 rounded-xl border border-slate-800 shadow">
+                        <p class="text-xs font-bold text-amber-400 uppercase tracking-wider">Dokumen Submitted</p>
+                        <h3 id="kpi-submitted" class="text-2xl font-black text-amber-400 mt-1">0</h3>
+                    </div>
+                    <div class="bg-slate-900/90 p-5 rounded-xl border border-slate-800 shadow">
+                        <p class="text-xs font-bold text-rose-400 uppercase tracking-wider">Anomali Muatan</p>
+                        <h3 id="kpi-anomali" class="text-2xl font-black text-rose-400 mt-1">0</h3>
+                    </div>
                 </div>
-                
-                <!-- Rasio Analisis Kewajaran Beban Prelist vs Realita Lapangan -->
-                <div class="bg-slate-900/90 p-5 rounded-2xl border border-slate-800/80 shadow-xl">
-                    <div class="mb-4">
-                        <h3 class="text-sm font-bold text-slate-300 tracking-wide uppercase">🔍 Analisis Kewajaran Muatan per Petugas</h3>
-                        <p class="text-xs text-slate-500">Korelasi Beban Prelist Fasih (X) dengan Total Ditemukan+Baru (Y)</p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-slate-900/90 p-5 rounded-2xl border border-slate-800 shadow-xl">
+                        <h3 class="text-sm font-bold text-slate-300 uppercase mb-2">Progress Dokumen per Kecamatan</h3>
+                        <div id="chart-kecamatan" class="w-full"></div>
                     </div>
-                    <div id="chart-kewajaran" class="w-full"></div>
+                    <div class="bg-slate-900/90 p-5 rounded-2xl border border-slate-800 shadow-xl">
+                        <h3 class="text-sm font-bold text-slate-300 uppercase mb-2">Analisis Kewajaran Beban Petugas</h3>
+                        <div id="chart-kewajaran" class="w-full"></div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Automated Core Insights System -->
-            <div class="bg-gradient-to-r from-slate-900 via-slate-900 to-teal-950/20 p-6 rounded-2xl border border-slate-800/90 shadow-xl space-y-4">
-                <h3 class="text-sm font-bold text-teal-400 flex items-center gap-2 tracking-wider uppercase">
-                    💡 Executive Summary & Insight Kewajaran Data
-                </h3>
-                <div id="insight-box" class="text-sm text-slate-300 space-y-3 pl-1">
-                    <!-- Dinamis Diisi oleh Engine Analitik JS -->
+            <div id="tab-kecamatan" class="tab-content hidden bg-slate-900/90 p-5 rounded-2xl border border-slate-800 shadow-xl">
+                <h3 class="text-lg font-bold text-slate-200 mb-4">Tabel Agregasi per Kecamatan</h3>
+                <div class="w-full overflow-x-auto">
+                    <table id="dt-kecamatan"></table>
                 </div>
             </div>
 
-            <!-- Petugas Performance Master Table Data -->
-            <div class="bg-slate-900/90 rounded-2xl border border-slate-800/80 shadow-xl overflow-hidden">
-                <div class="p-5 border-b border-slate-800/80 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                    <div>
-                        <h3 class="text-sm font-bold text-slate-300 tracking-wide uppercase">📋 Matriks Kinerja Petugas (PPL & PML)</h3>
-                        <p class="text-xs text-slate-500">Urutan kontribusi verifikasi dokumen disetujui terbanyak</p>
-                    </div>
-                    <span class="text-xs px-2.5 py-1 bg-slate-800 text-slate-400 rounded-md font-semibold border border-slate-700/50">
-                        Client-side Processed
-                    </span>
+            <div id="tab-desa" class="tab-content hidden bg-slate-900/90 p-5 rounded-2xl border border-slate-800 shadow-xl">
+                <h3 class="text-lg font-bold text-slate-200 mb-4">Tabel Agregasi per Desa</h3>
+                <div class="w-full overflow-x-auto">
+                    <table id="dt-desa"></table>
                 </div>
-                <div class="overflow-x-auto max-h-[28rem] custom-scrollbar">
-                    <table class="w-full text-left border-collapse text-sm">
-                        <thead class="bg-slate-850 text-slate-400 sticky top-0 bg-slate-900 border-b border-slate-800 shadow-sm z-10">
-                            <tr>
-                                <th class="p-4 font-semibold text-slate-300">Nama PPL</th>
-                                <th class="p-4 font-semibold text-slate-300">Nama PML</th>
-                                <th class="p-4 font-semibold text-slate-300 text-center">Open</th>
-                                <th class="p-4 font-semibold text-slate-300 text-center">Draft</th>
-                                <th class="p-4 font-semibold text-slate-300 text-center">Submitted</th>
-                                <th class="p-4 font-semibold text-slate-300 text-center font-bold text-teal-400">Approved</th>
-                            </tr>
-                        </thead>
-                        <tbody id="table-petugas-body" class="divide-y divide-slate-850 text-slate-300">
-                            <!-- Dinamis Terisi oleh Data Parser -->
-                        </tbody>
-                    </table>
+            </div>
+
+            <div id="tab-petugas" class="tab-content hidden bg-slate-900/90 p-5 rounded-2xl border border-slate-800 shadow-xl">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold text-slate-200">Rapor Kinerja Petugas Lapangan</h3>
+                    <span class="bg-slate-800 text-xs text-slate-300 px-3 py-1 rounded-full border border-slate-700">Target Ideal: 10-13 /hari</span>
+                </div>
+                <div class="w-full overflow-x-auto">
+                    <table id="dt-petugas"></table>
                 </div>
             </div>
 
         </div>
     </main>
 
-    <!-- Core App Dashboard Engine Script -->
     <script>
+        // Tab Logic
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('bg-slate-800', 'text-teal-400', 'border-b-2', 'border-teal-400');
+                el.classList.add('text-slate-400');
+            });
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+            let activeBtn = document.getElementById('btn-tab-' + tabId);
+            activeBtn.classList.remove('text-slate-400');
+            activeBtn.classList.add('bg-slate-800', 'text-teal-400', 'border-b-2', 'border-teal-400');
+        }
+
         document.getElementById('excel-file').addEventListener('change', handleFile, false);
 
-        let chartKec = null;
-        let chartKew = null;
+        let chartKec = null, chartKew = null;
+        let dtKecInstance = null, dtDesaInstance = null, dtPetugasInstance = null;
 
         function handleFile(e) {
             const files = e.target.files;
@@ -177,8 +206,6 @@
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, {type: 'array'});
-                    
-                    // Prioritaskan sheet bernama 'seluruh sls'
                     const sheetName = workbook.SheetNames.find(name => name.toLowerCase().includes('sls')) || workbook.SheetNames[0];
                     const worksheet = workbook.Sheets[sheetName];
                     const jsonData = XLSX.utils.sheet_to_json(worksheet);
@@ -186,204 +213,194 @@
                     if(jsonData && jsonData.length > 0) {
                         processDashboardData(jsonData);
                     } else {
-                        alert("Gagal membaca data: Pastikan format atau nama kolom sesuai berkas SE2026!");
+                        alert("Gagal membaca data: Sheet kosong.");
                     }
                 } catch (err) {
                     console.error(err);
-                    alert("Kesalahan membaca file Excel. Pastikan berkas tidak terenkripsi/rusak.");
+                    alert("Gagal membaca Excel.");
                 }
             };
             reader.readAsArrayBuffer(file);
         }
 
+        function getPercentHtml(realisasi, target) {
+            if(target === 0) return '0%';
+            let p = ((realisasi/target)*100).toFixed(1);
+            let color = p >= 100 ? 'text-teal-400' : (p >= 50 ? 'text-amber-400' : 'text-rose-400');
+            return `<span class="font-bold ${color}">${p}%</span>`;
+        }
+
         function processDashboardData(data) {
-            // Toggle Display UI Components
             document.getElementById('welcome-card').classList.add('hidden');
             document.getElementById('dashboard-content').classList.remove('hidden');
 
-            // 1. Initial State Aggregation Variables
             let totalSls = data.length;
             let sumOpen = 0, sumDraft = 0, sumSubmitted = 0, sumApproved = 0;
             let anomaliCount = 0;
+            let globalTargetPrelist = 0;
+            let globalRealisasi = 0;
 
-            let kecData = {};
-            let pplData = {};
+            let kecData = {}, desaData = {}, pplData = {};
 
             data.forEach(row => {
-                // Konversi data kolom numerik secara adaptif
                 let openVal = parseInt(row['OPEN']) || 0;
                 let draftVal = parseInt(row['DRAFT']) || 0;
                 let subVal = parseInt(row['SUBMITTED BY Pencacah']) || 0;
                 let appVal = parseInt(row['APPROVED BY Pengawas']) || 0;
-                let prelistFasih = parseInt(row['Total Muatan FASIH']) || 0;
-                let realitaDitemukan = parseInt(row['Jumlah Keluarga+Usaha']) || 0;
+                
+                let prelistFasih = parseInt(row['Total Muatan FASIH']) || parseInt(row['JumlahUsahaPrelist (UMKM dan ST)']) || 0;
+                let realitaDitemukan = parseInt(row['Jumlah Keluarga+Usaha']) || parseInt(row['Jumlah Submit']) || 0;
 
-                sumOpen += openVal;
-                sumDraft += draftVal;
-                sumSubmitted += subVal;
-                sumApproved += appVal;
+                sumOpen += openVal; sumDraft += draftVal; sumSubmitted += subVal; sumApproved += appVal;
+                globalTargetPrelist += prelistFasih;
+                globalRealisasi += realitaDitemukan;
 
-                // Definisi Algoritma Kewajaran Data: Deviasi antara Prelist Fasih & Realita Ditemukan > 50%
                 if (prelistFasih > 0 && Math.abs(realitaDitemukan - prelistFasih) / prelistFasih > 0.5) {
                     anomaliCount++;
                 }
 
-                // Agregasi Level Teritorial (Kecamatan)
-                let kec = row['Nama Kec'] || 'TIDAK TERIDENTIFIKASI';
-                if (!kecData[kec]) {
-                    kecData[kec] = { open: 0, draft: 0, submitted: 0, approved: 0 };
-                }
-                kecData[kec].open += openVal;
-                kecData[kec].draft += draftVal;
-                kecData[kec].submitted += subVal;
-                kecData[kec].approved += appVal;
+                // Grouping Kecamatan
+                let kec = row['Nama Kec'] || 'Tanpa Kecamatan';
+                if (!kecData[kec]) kecData[kec] = { target:0, realisasi:0, open:0, draft:0, submitted:0, approved:0, sls:0 };
+                kecData[kec].sls += 1;
+                kecData[kec].target += prelistFasih;
+                kecData[kec].realisasi += realitaDitemukan;
+                kecData[kec].open += openVal; kecData[kec].submitted += subVal; kecData[kec].approved += appVal;
 
-                // Agregasi Level Sumber Daya Manusia (Petugas PPL & PML)
-                let ppl = row['Nama PPL'] || 'Petugas Tidak Terdaftar';
+                // Grouping Desa
+                let desa = row['Nama Desa'] || 'Tanpa Desa';
+                let kecDesaKey = kec + " - " + desa;
+                if (!desaData[kecDesaKey]) desaData[kecDesaKey] = { kec: kec, desa: desa, target:0, realisasi:0, sls:0 };
+                desaData[kecDesaKey].sls += 1;
+                desaData[kecDesaKey].target += prelistFasih;
+                desaData[kecDesaKey].realisasi += realitaDitemukan;
+
+                // Grouping PPL
+                let ppl = row['Nama PPL'] || 'Tanpa Nama';
                 let pml = row['Nama PML'] || '-';
-                if (!pplData[ppl]) {
-                    pplData[ppl] = { name: ppl, pml: pml, open: 0, draft: 0, submitted: 0, approved: 0, prelist: 0, ditemukan: 0 };
-                }
-                pplData[ppl].open += openVal;
-                pplData[ppl].draft += draftVal;
-                pplData[ppl].submitted += subVal;
-                pplData[ppl].approved += appVal;
-                pplData[ppl].prelist += prelistFasih;
-                pplData[ppl].ditemukan += realitaDitemukan;
+                if (!pplData[ppl]) pplData[ppl] = { name: ppl, pml: pml, kec: kec, target: 0, realisasi: 0, app: 0 };
+                pplData[ppl].target += prelistFasih;
+                pplData[ppl].realisasi += realitaDitemukan;
+                pplData[ppl].app += appVal;
             });
 
-            // Update UI Interface KPI Elements
+            // --- 1. GLOBAL PROGRESS & TARGET CALCULATION ---
+            let globalPersen = globalTargetPrelist > 0 ? ((globalRealisasi / globalTargetPrelist) * 100).toFixed(1) : 0;
+            document.getElementById('global-persen-text').innerText = globalPersen + "%";
+            document.getElementById('global-progress-bar').style.width = Math.min(globalPersen, 100) + "%";
+            document.getElementById('global-realisasi').innerText = "Realisasi: " + globalRealisasi.toLocaleString('id-ID');
+            document.getElementById('global-target').innerText = "Target Prelist: " + globalTargetPrelist.toLocaleString('id-ID');
+
+            // Kalkulasi Target Harian (Mulai 15 Juni 2026 ke Tanggal Hari Ini)
+            const startDate = new Date('2026-06-15');
+            const today = new Date(); // Asumsi user membuka pada tanggal terkini
+            let elapsedDays = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
+            if (elapsedDays < 1) elapsedDays = 1; 
+            
+            let totalPetugas = Object.keys(pplData).length;
+            let targetAvg = totalPetugas > 0 ? (globalRealisasi / totalPetugas / elapsedDays).toFixed(1) : 0;
+            
+            document.getElementById('target-days').innerText = elapsedDays;
+            document.getElementById('target-avg').innerText = targetAvg;
+            
+            let statusEl = document.getElementById('target-status');
+            let bgIndicator = document.getElementById('target-indicator-bg');
+            if(parseFloat(targetAvg) >= 10) {
+                statusEl.innerText = "ON TRACK ✅";
+                statusEl.className = "text-lg font-bold text-teal-400";
+                bgIndicator.className = "absolute top-0 right-0 w-24 h-24 bg-teal-500/10 rounded-bl-full -mr-4 -mt-4";
+            } else {
+                statusEl.innerText = "DI BAWAH TARGET ⚠️";
+                statusEl.className = "text-lg font-bold text-rose-400";
+                bgIndicator.className = "absolute top-0 right-0 w-24 h-24 bg-rose-500/10 rounded-bl-full -mr-4 -mt-4";
+            }
+
+            // Update KPI Cards
             document.getElementById('kpi-total-sls').innerText = totalSls.toLocaleString('id-ID');
             document.getElementById('kpi-approved').innerText = sumApproved.toLocaleString('id-ID');
             document.getElementById('kpi-submitted').innerText = sumSubmitted.toLocaleString('id-ID');
             document.getElementById('kpi-anomali').innerText = anomaliCount.toLocaleString('id-ID');
 
-            // 2. Render Stacked Bar Chart Progress Teritorial Kecamatan
+            // --- 2. UPDATE CHARTS ---
             let kecCategories = Object.keys(kecData);
-            let seriesApproved = kecCategories.map(k => kecData[k].approved);
-            let seriesSubmitted = kecCategories.map(k => kecData[k].submitted);
-            let seriesOpen = kecCategories.map(k => kecData[k].open);
-
-            let optionsKec = {
-                chart: { type: 'bar', height: 380, stacked: true, toolbar: { show: true }, foreColor: '#94a3b8', fontFamily: 'sans-serif' },
-                colors: ['#06b6d4', '#fbbf24', '#334155'],
-                series: [
-                    { name: 'Approved Pengawas', data: seriesApproved },
-                    { name: 'Submitted Pencacah', data: seriesSubmitted },
-                    { name: 'Open / Unprocessed', data: seriesOpen }
-                ],
-                xaxis: { categories: kecCategories, labels: { style: { fontSize: '10px' } } },
-                legend: { position: 'top', horizontalAlign: 'left' },
-                fill: { opacity: 0.95 },
-                grid: { borderColor: '#1e293b', strokeDashArray: 4 },
-                plotOptions: { bar: { borderRadius: 4, columnWidth: '60%' } }
-            };
-
             if(chartKec) chartKec.destroy();
-            chartKec = new ApexCharts(document.querySelector("#chart-kecamatan"), optionsKec);
+            chartKec = new ApexCharts(document.querySelector("#chart-kecamatan"), {
+                chart: { type: 'bar', height: 320, stacked: true, toolbar: { show: false }, foreColor: '#94a3b8' },
+                colors: ['#0d9488', '#d97706', '#334155'],
+                series: [
+                    { name: 'Approved', data: kecCategories.map(k => kecData[k].approved) },
+                    { name: 'Submitted', data: kecCategories.map(k => kecData[k].submitted) },
+                    { name: 'Open', data: kecCategories.map(k => kecData[k].open) }
+                ],
+                xaxis: { categories: kecCategories },
+                legend: { position: 'top' },
+                plotOptions: { bar: { borderRadius: 2 } }
+            });
             chartKec.render();
 
-            // 3. Render Advanced Scatter Chart Kewajaran Data Performa Petugas
-            let scatterSeries = Object.values(pplData).map(p => {
-                return { x: p.prelist, y: p.ditemukan, name: p.name, pml: p.pml };
-            });
-
-            let optionsKewajaran = {
-                chart: { type: 'scatter', height: 380, zoom: { enabled: true, type: 'xy' }, foreColor: '#94a3b8', fontFamily: 'sans-serif' },
-                colors: ['#06b6d4'],
-                series: [{ name: 'Beban Muatan Kerja Petugas', data: scatterSeries }],
-                xaxis: { 
-                    title: { text: 'Target Prelist Fasih (Muatan Awal)', style: { color: '#94a3b8', fontWeight: 600 } },
-                    axisBorder: { show: false }, axisTicks: { show: false }
-                },
-                yaxis: { 
-                    title: { text: 'Realita Jumlah Keluarga + Usaha Lapangan', style: { color: '#94a3b8', fontWeight: 600 } }
-                },
-                grid: { borderColor: '#1e293b', strokeDashArray: 4 },
-                markers: { size: 6, strokeColors: '#0f172a', strokeWidth: 2, hover: { size: 8 } },
+            if(chartKew) chartKew.destroy();
+            chartKew = new ApexCharts(document.querySelector("#chart-kewajaran"), {
+                chart: { type: 'scatter', height: 320, foreColor: '#94a3b8' },
+                colors: ['#0ea5e9'],
+                series: [{ name: 'Beban Petugas', data: Object.values(pplData).map(p => ({ x: p.target, y: p.realisasi, name: p.name })) }],
+                xaxis: { title: { text: 'Target Prelist' } }, yaxis: { title: { text: 'Realisasi Ditemukan' } },
                 tooltip: {
                     custom: function({series, seriesIndex, dataPointIndex, w}) {
-                        let point = w.config.series[seriesIndex].data[dataPointIndex];
-                        return `<div class="bg-slate-900 border border-slate-700 p-3 rounded-lg shadow-xl text-xs space-y-1">
-                                  <div class="font-bold text-teal-400 border-b border-slate-800 pb-1 mb-1">PPL: ${point.name}</div>
-                                  <div><b>PML Pengawas:</b> ${point.pml}</div>
-                                  <div><b>Prelist Fasih Target:</b> ${point.x}</div>
-                                  <div><b>Keluarga+Usaha Ditemukan:</b> ${point.y}</div>
-                                  <div class="text-[10px] pt-1 text-slate-500 font-medium">Deviasi: ${Math.abs(point.y - point.x)} muatan</div>
-                                </div>`;
+                        let pt = w.config.series[seriesIndex].data[dataPointIndex];
+                        return `<div class="p-2 bg-slate-800 border border-slate-700 text-xs"><b>${pt.name}</b><br/>Target: ${pt.x}<br/>Realisasi: ${pt.y}</div>`;
                     }
                 }
-            };
-
-            if(chartKew) chartKew.destroy();
-            chartKew = new ApexCharts(document.querySelector("#chart-kewajaran"), optionsKewajaran);
+            });
             chartKew.render();
 
-            // 4. Data Population Master Petugas Table (Sorted Descending by Approved Status)
-            let sortedPetugas = Object.values(pplData).sort((a,b) => b.approved - a.approved);
-            let tableBody = document.getElementById('table-petugas-body');
-            tableBody.innerHTML = '';
+            // --- 3. INITIALIZE DATATABLES ---
             
-            sortedPetugas.forEach(p => {
-                let rowHtml = `
-                    <tr class="hover:bg-slate-850/60 transition-colors border-b border-slate-850">
-                        <td class="p-4 font-semibold text-slate-200">${p.name}</td>
-                        <td class="p-4 text-slate-400 text-xs">${p.pml}</td>
-                        <td class="p-4 text-center text-slate-400 font-mono">${p.open.toLocaleString('id-ID')}</td>
-                        <td class="p-4 text-center text-amber-500/90 font-mono">${p.draft.toLocaleString('id-ID')}</td>
-                        <td class="p-4 text-center text-cyan-400 font-mono">${p.submitted.toLocaleString('id-ID')}</td>
-                        <td class="p-4 text-center font-bold text-teal-400 font-mono bg-teal-500/5">${p.approved.toLocaleString('id-ID')}</td>
-                    </tr>
-                `;
-                tableBody.insertAdjacentHTML('beforeend', rowHtml);
+            // Format Array untuk Datatable Kecamatan
+            let arrKec = Object.keys(kecData).map(k => [
+                k, 
+                kecData[k].sls.toString(), 
+                kecData[k].target.toLocaleString(), 
+                kecData[k].realisasi.toLocaleString(), 
+                getPercentHtml(kecData[k].realisasi, kecData[k].target)
+            ]);
+            if(dtKecInstance) dtKecInstance.destroy();
+            dtKecInstance = new simpleDatatables.DataTable("#dt-kecamatan", {
+                data: { headings: ["Kecamatan", "Jml SLS", "Target Muatan", "Realisasi Ditemukan", "Progress"], data: arrKec },
+                searchable: true, fixedHeight: true, perPage: 10
             });
 
-            // 5. Advanced Automated Insight Generation Engine
-            let insightBox = document.getElementById('insight-box');
-            insightBox.innerHTML = '';
+            // Format Array untuk Datatable Desa
+            let arrDesa = Object.values(desaData).map(d => [
+                d.kec, 
+                d.desa, 
+                d.sls.toString(), 
+                d.target.toLocaleString(), 
+                d.realisasi.toLocaleString(), 
+                getPercentHtml(d.realisasi, d.target)
+            ]);
+            if(dtDesaInstance) dtDesaInstance.destroy();
+            dtDesaInstance = new simpleDatatables.DataTable("#dt-desa", {
+                data: { headings: ["Kecamatan", "Desa", "Jml SLS", "Target Muatan", "Realisasi Ditemukan", "Progress"], data: arrDesa },
+                searchable: true, fixedHeight: true, perPage: 10
+            });
 
-            // Hitung Kecamatan dengan status Terendah vs Tertinggi
-            let sortedKecKeys = Object.keys(kecData).sort((a,b) => kecData[b].approved - kecData[a].approved);
-            let highestKec = sortedKecKeys[0] || '-';
-            let lowestKec = sortedKecKeys[sortedKecKeys.length - 1] || '-';
-
-            // Temukan Anomali Extreme Outlier (Beban lapangan naik > 2.5 kali lipat dari Target Prelist Fasih)
-            let extremeOutliers = sortedPetugas.filter(p => p.prelist > 5 && (p.ditemukan / p.prelist > 2.5));
-
-            // Append Insight Wilayah
-            insightBox.insertAdjacentHTML('beforeend', `
-                <div class="flex items-start gap-2 text-slate-300">
-                    <span class="text-teal-400 font-bold">📍</span>
-                    <span><b>Pantauan Geografis:</b> Kecamatan dengan volume persetujuan dokumen tertinggi dipimpin oleh <b>${highestKec}</b>. Sebaliknya, akselerasi pengerjaan di Kecamatan <b>${lowestKec}</b> tercatat paling rendah. Direkomendasikan melakukan re-alokasi atensi monitoring pengawasan ke wilayah tersebut.</span>
-                </div>
-            `);
-            
-            // Append Insight Kewajaran Data Khusus
-            if(extremeOutliers.length > 0) {
-                let namaOutliers = extremeOutliers.slice(0, 3).map(p => p.name).join(', ');
-                insightBox.insertAdjacentHTML('beforeend', `
-                    <div class="flex items-start gap-2 text-slate-300 bg-rose-950/20 border border-rose-900/40 p-3 rounded-xl">
-                        <span class="text-rose-400 font-bold">⚠️</span>
-                        <span><b>Indikasi Kewajaran Muatan:</b> Terdeteksi <b>${extremeOutliers.length} petugas</b> dengan lonjakan realita lapangan sangat ekstrem (>2.5x lipat target Prelist Fasih). Contoh PPL: <b>${namaOutliers}</b>. Hal ini berpotensi disebabkan oleh masifnya penemuan entitas baru atau salah klasifikasi objek SLS. Tim PML wajib melakukan uji petik kesesuaian dokumen sampel (supervisi kualitas).</span>
-                    </div>
-                `);
-            } else {
-                insightBox.insertAdjacentHTML('beforeend', `
-                    <div class="flex items-start gap-2 text-slate-300">
-                        <span class="text-emerald-400 font-bold">✅</span>
-                        <span><b>Analisis Deviasi:</b> Distribusi beban kerja seluruh petugas PPL terpantau wajar dan linier dengan target Prelist Fasih awal. Tidak ditemukan lonjakan anomali data (mass-outliers) yang mengarah pada mal-input data lapangan.</span>
-                    </div>
-                `);
-            }
-            
-            // Append Insight Target Kerja Global
-            let globalRasioApproved = ((sumApproved / (sumOpen + sumDraft + sumSubmitted + sumApproved)) * 105 || 0).toFixed(1);
-            insightBox.insertAdjacentHTML('beforeend', `
-                <div class="flex items-start gap-2 text-slate-300">
-                    <span class="text-cyan-400 font-bold">📈</span>
-                    <span><b>Rasio Efisiensi Dokumen:</b> Dari keseluruhan basis beban pengerjaan, sebanyak <b>${anomaliCount} SLS</b> masuk dalam kategori deviasi tinggi (>50% margin). Pastikan koordinasi intensif antara PPL dan PML berjalan sebelum batas waktu sinkronisasi sistem Fasih ditutup.</span>
-                </div>
-            `);
+            // Format Array untuk Datatable Petugas
+            let arrPetugas = Object.values(pplData).map(p => {
+                let daily = elapsedDays > 0 ? (p.realisasi / elapsedDays).toFixed(1) : 0;
+                let statusBadge = daily >= 10 
+                    ? `<span class="bg-teal-900/50 text-teal-400 px-2 py-1 rounded text-xs font-bold border border-teal-700">On Track</span>` 
+                    : `<span class="bg-rose-900/50 text-rose-400 px-2 py-1 rounded text-xs font-bold border border-rose-700">Di Bawah Target</span>`;
+                
+                return [
+                    p.name, p.pml, p.kec, p.target.toLocaleString(), p.realisasi.toLocaleString(), 
+                    daily + " /hari", statusBadge, p.app.toString()
+                ];
+            });
+            if(dtPetugasInstance) dtPetugasInstance.destroy();
+            dtPetugasInstance = new simpleDatatables.DataTable("#dt-petugas", {
+                data: { headings: ["PPL", "PML", "Kecamatan", "Target Muatan", "Realisasi", "Rata-rata Harian", "Status Kinerja", "Dokumen Approved"], data: arrPetugas },
+                searchable: true, fixedHeight: true, perPage: 15
+            });
         }
     </script>
 </body>
